@@ -1,8 +1,11 @@
 package configuration
 
 import (
+	"encoding/json"
 	"flag"
 	"fmt"
+	"io/ioutil"
+	"os"
 )
 
 /*
@@ -30,12 +33,46 @@ import (
 */
 
 type Config struct {
-	fileConfig FileConfig
+	fileConfig EMMFileConfig
 	cmdConfig  CmdArgs
 }
 
 func (cfg *Config) Init() {
 	cfg.cmdConfig.Parse()
+
+	// Parse the EMM configuration file
+	jsonFile, err := os.Open("emm-info.json")
+
+	if err != nil {
+		fmt.Println(err)
+	}
+
+	jsonByteArr, err := ioutil.ReadAll(jsonFile)
+	json.Unmarshal([]byte(jsonByteArr), &cfg.fileConfig)
+	fmt.Println(cfg.fileConfig.Clusters[0].Name)
+}
+
+func (cfg Config) Ip() string {
+	return cfg.cmdConfig.ip
+}
+
+func (cfg Config) Username() string {
+	return cfg.cmdConfig.username
+}
+
+func (cfg Config) Password() string {
+	return cfg.cmdConfig.password
+}
+
+func (cfg Config) Port() string {
+	return cfg.cmdConfig.port
+}
+
+func (cfg Config) String() string {
+	return fmt.Sprintf("IP:%s\nPort:%s\nUsername:%s\nPassword:%s\n", cfg.cmdConfig.ip,
+		cfg.cmdConfig.port,
+		cfg.cmdConfig.username,
+		cfg.cmdConfig.password)
 }
 
 type CmdArgs struct {
@@ -50,29 +87,6 @@ type CmdArgs struct {
 	outputDir  string
 }
 
-func (cfg *Config) Ip() string {
-	return cfg.cmdConfig.ip
-}
-
-func (cfg *Config) Username() string {
-	return cfg.cmdConfig.username
-}
-
-func (cfg *Config) Password() string {
-	return cfg.cmdConfig.password
-}
-
-func (cfg *Config) Port() string {
-	return cfg.cmdConfig.port
-}
-
-func (cfg Config) String() string {
-	return fmt.Sprintf("IP:%s\nPort:%s\nUsername:%s\nPassword:%s\n", cfg.cmdConfig.ip,
-		cfg.cmdConfig.port,
-		cfg.cmdConfig.username,
-		cfg.cmdConfig.password)
-}
-
 func (cfg *CmdArgs) Parse() {
 	flag.StringVar(&cfg.ip, "ip", "localhost", "Postgresql DB instance IP address")
 	flag.StringVar(&cfg.username, "username", "mmsuper", "DB user name")
@@ -80,7 +94,4 @@ func (cfg *CmdArgs) Parse() {
 	flag.StringVar(&cfg.port, "port", "5432", "DB port")
 
 	flag.Parse()
-}
-
-type FileConfig struct {
 }
