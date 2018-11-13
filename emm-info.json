@@ -23,13 +23,11 @@
         },
         {
           "name": "Server2",
-          "active_stream": [],
           "ip": "",
           "port": ""
         },
         {
           "name": "Server3",
-          "active_stream": [],
           "ip": "",
           "port": ""
         }

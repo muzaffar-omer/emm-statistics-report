@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"flag"
 	"fmt"
+	log "github.com/sirupsen/logrus"
 	"io/ioutil"
 	"os"
 )
@@ -38,18 +39,42 @@ type Config struct {
 }
 
 func (cfg *Config) Init() {
+
+	// Parse command line args
 	cfg.cmdConfig.Parse()
 
-	// Parse the EMM configuration file
+	// Parse EMM configuration file
 	jsonFile, err := os.Open("emm-info.json")
 
+	// Error while reading the configuration file
 	if err != nil {
-		fmt.Println(err)
-	}
 
-	jsonByteArr, err := ioutil.ReadAll(jsonFile)
-	json.Unmarshal([]byte(jsonByteArr), &cfg.fileConfig)
-	fmt.Println(cfg.fileConfig.Clusters[0].Name)
+		log.WithFields(log.Fields{
+			"error": err,
+		}).Error("Opening emm-info.json file")
+
+	} else {
+		jsonByteArr, err := ioutil.ReadAll(jsonFile)
+
+		// Error during parsing of file contents
+		if err != nil {
+
+			log.WithFields(log.Fields{
+				"error": err,
+			}).Error("Reading contents of emm-info.json file")
+
+		} else {
+
+			// Un packing the configuration file into the Config.fileConfig parameter
+			err = json.Unmarshal([]byte(jsonByteArr), &cfg.fileConfig)
+
+			if err != nil {
+				log.WithFields(log.Fields{
+					"error": err,
+				}).Error("Parsing contents of emm-info.json file")
+			}
+		}
+	}
 }
 
 func (cfg Config) Ip() string {
@@ -66,6 +91,14 @@ func (cfg Config) Password() string {
 
 func (cfg Config) Port() string {
 	return cfg.cmdConfig.port
+}
+
+func (cfg Config) Clusters() []Cluster {
+	return cfg.fileConfig.Clusters
+}
+
+func (cfg Config) Streams() []Stream {
+	return cfg.fileConfig.Streams
 }
 
 func (cfg Config) String() string {
