@@ -12,7 +12,19 @@ type LogicalServer struct {
 	Username     string `json:"username"`
 	Password     string `json:"password"`
 	Port         string `json:"port"`
+	Database     string `json:"database"`
 	ActiveStream string `json:"active_stream"`
+}
+
+func (this LogicalServer) Equals(another LogicalServer) bool {
+	if this.Username == another.Username &&
+		this.Ip == another.Ip &&
+		this.Password == another.Password &&
+		this.Port == another.Port {
+		return true
+	}
+
+	return false
 }
 
 type Cluster struct {
