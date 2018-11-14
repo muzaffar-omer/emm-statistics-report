@@ -1,6 +1,7 @@
 package main
 
 import (
+	"database/sql"
 	"emm-statistics-report/configuration"
 	"emm-statistics-report/database"
 	"fmt"
@@ -36,7 +37,7 @@ func main() {
 
 		rows := database.GetAllRows(session, "fraud_cases")
 
-		var msisdn, file_name, insert_date, imsi, date string
+		var msisdn, file_name, insert_date, imsi, date sql.NullString
 
 		for rows.Next() {
 
@@ -45,7 +46,7 @@ func main() {
 				fmt.Println(err)
 			}
 
-			fmt.Printf("msisdn : %s, file_name : %s, imsi : %s, date : %s \n", msisdn, file_name, imsi, date)
+			fmt.Printf("msisdn : %s, file_name : %s, imsi : %s, date : %s \n", msisdn.String, file_name.String, imsi.String, date.String)
 		}
 
 		//if rows != nil {
