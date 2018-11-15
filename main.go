@@ -1,7 +1,6 @@
 package main
 
 import (
-	"database/sql"
 	"emm-statistics-report/configuration"
 	"emm-statistics-report/database"
 	"fmt"
@@ -33,27 +32,30 @@ func main() {
 	session := database.CreateSession(ls)
 
 	if session != nil {
+
 		log.Info("Database opened successfully")
+		//atlRow := database.AuditTrailLogEntry{}
+		//tableDescription := database.TableDescription{}
+		totalProcessedInOut := database.TotalProcessedInOut{}
 
-		rows := database.GetAllRows(session, "fraud_cases")
+		// rows := database.GetAllRows(session, "audittraillogentry")
+		// rows := database.ListTables(session)
+		rows := database.GetTotalProcessedInOut(session)
+		noRows := 0
 
-		var msisdn, file_name, insert_date, imsi, date sql.NullString
-
+		//for rows.NextResultSet() {
 		for rows.Next() {
 
-			if err := rows.Scan(&msisdn, &file_name, &insert_date, &imsi, &date); err != nil {
-				fmt.Println("Error getting rows")
-				fmt.Println(err)
-			}
+			rows.StructScan(&totalProcessedInOut)
+			// fmt.Println(tableDescription.TableName, tableDescription.TableSchema, tableDescription.UserDefinedTypeName)
+			fmt.Println(totalProcessedInOut.TotalInputBytes, totalProcessedInOut.TotalInputCdrs, totalProcessedInOut.TotalInputFiles)
 
-			fmt.Printf("msisdn : %s, file_name : %s, imsi : %s, date : %s \n", msisdn.String, file_name.String, imsi.String, date.String)
+			noRows += 1
 		}
-
-		//if rows != nil {
-		//	colmuns, _ := rows.;
-		//	for column, _ := range colmuns {
-		//		fmt.Print(column)
-		//	}
 		//}
+
+		rows.Close()
+
+		fmt.Printf("Total number of rows %d\n", noRows)
 	}
 }
