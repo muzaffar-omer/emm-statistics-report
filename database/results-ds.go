@@ -1,5 +1,7 @@
 package database
 
+import "fmt"
+
 /*
 	ATEvent ::= [APPLICATION 43] ENUMERATED
 				{
@@ -40,4 +42,21 @@ type TotalProcessedInOut struct {
 	TotalInputCdrs   string `db:"total_input_cdrs"`
 	TotalOutputFiles string `db:"total_output_files"`
 	TotalOutputCdrs  string `db:"total_output_cdrs"`
+	TotalOutputBytes string `db:"total_output_bytes"`
+}
+
+func (t TotalProcessedInOut) String() string {
+
+	return fmt.Sprintf("total_input_files : %s, "+
+		"total_input_bytes : %s, "+
+		"total_input_cdrs: %s, "+
+		"total_output_files : %s, "+
+		"total_output_cdrs : %s, "+
+		"total_output_bytes : %s\n",
+		t.TotalInputFiles,
+		t.TotalInputBytes,
+		t.TotalInputCdrs,
+		t.TotalOutputFiles,
+		t.TotalOutputCdrs,
+		t.TotalOutputBytes)
 }

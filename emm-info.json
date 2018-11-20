@@ -9,38 +9,56 @@
         "NR_Dist_Log",
         "R_Dist_Log"
       ]
+    },
+    {
+      "name": "SMSC_IC",
+      "collectors": [
+        "SMSC MT",
+        "Common_distributer",
+        "IC_COMMON_1_APP",
+        "IC_COMMON_2_APP"
+      ],
+      "distributors": [
+        "BeepCDR (copy 1)",
+        "A_LocalDisk",
+        "J_LocalDisk",
+        "BeepCDR",
+        "IC_COMMON",
+        "IC_COMMON_2",
+        "IC_COMMON_3"
+      ]
+    },
+    {
+      "name": "AIR_UAT",
+      "collectors": [
+        "AIR_RAW_Collect"
+      ],
+      "distributors": [
+        "AIR_UAT_SPLITER_DIST"
+      ]
     }
   ],
   "clusters": [
     {
-      "name": "RYD1",
+      "default_username": "mmsuper",
+      "default_password": "mediation",
+      "name": "TEST",
       "logical_servers": [
         {
-          "name": "Server1",
-          "ip": "10.135.3.147",
-          "port": "5432",
-          "active_stream": "MSSConfig"
-        },
-        {
-          "name": "Server2",
-          "ip": "",
-          "port": ""
+          "name": "Server5",
+          "ip": "10.135.5.81",
+          "database": "fm_db_Server5",
+          "port": "5781",
+          "active_stream": "SMSC_IC"
         },
         {
           "name": "Server3",
-          "ip": "",
-          "port": ""
+          "ip": "10.135.5.81",
+          "database": "fm_db_Server3",
+          "port": "5472",
+          "active_stream": "AIR_UAT"
         }
       ]
-    },
-    {
-      "name": "RYD2"
-    },
-    {
-      "name": "JED1"
-    },
-    {
-      "name": "JED2"
     }
   ]
 }
