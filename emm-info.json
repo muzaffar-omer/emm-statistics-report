@@ -19,13 +19,9 @@
         "IC_COMMON_2_APP"
       ],
       "distributors": [
-        "BeepCDR (copy 1)",
-        "A_LocalDisk",
-        "J_LocalDisk",
-        "BeepCDR",
-        "IC_COMMON",
-        "IC_COMMON_2",
-        "IC_COMMON_3"
+        "STC_A_LocalDisk",
+        "MOB_A_LocalDisk",
+        "NON_A_LocalDisk (copy 1)"
       ]
     },
     {
@@ -34,7 +30,7 @@
         "AIR_RAW_Collect"
       ],
       "distributors": [
-        "AIR_UAT_SPLITER_DIST"
+        "AIR_BIR_OUT"
       ]
     }
   ],

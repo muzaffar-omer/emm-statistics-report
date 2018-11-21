@@ -137,8 +137,12 @@ func GetStreamProcessedInOut(stream *config.Stream) *sqlx.Rows {
         FROM   audittraillogentry 
         WHERE  event = 68 and trim(outnodename) in %s) c;`,
 			collectorsInStatement,
-			distributorsInStatement,
+			collectorsInStatement,
 			distributorsInStatement)
+
+		logger.WithFields(logrus.Fields{
+			"query": query,
+		}).Debug("GetStreamProcessedInOut query")
 
 		if session != nil {
 			rows, err := session.Db.Queryx(query)
@@ -146,6 +150,7 @@ func GetStreamProcessedInOut(stream *config.Stream) *sqlx.Rows {
 			if err != nil {
 				logger.WithFields(logrus.Fields{
 					"query": query,
+					"error": err,
 				}).Error("Stream processed input/output")
 			} else {
 				return rows
@@ -155,7 +160,103 @@ func GetStreamProcessedInOut(stream *config.Stream) *sqlx.Rows {
 	} else {
 		logger.WithFields(logrus.Fields{
 			"stream": stream.Name,
-		}).Error("No logical server running the stream")
+		}).Error("Stream not running in any logical server")
+	}
+
+	return nil
+}
+
+func GetGroupedStreamProcessedInOut(stream *config.Stream, groupBy string) *sqlx.Rows {
+
+	if ls := config.FindLsRunningStream(stream); ls != nil {
+
+		logger.WithFields(logrus.Fields{
+			"logical_server": ls.Name,
+			"stream":         stream.Name,
+		}).Debug("Stream is active in a logical server")
+
+		session := CreateSession(ls)
+
+		collectorsInStatement := createSQLInStatement(stream.Collectors)
+		distributorsInStatement := createSQLInStatement(stream.Distributors)
+
+		// By default, group by day
+		dateFormat := "YYYY-MM-DD"
+
+		switch groupBy {
+		case "minute":
+			dateFormat = "YYYY-MM-DD HH24MI"
+		case "hour":
+			dateFormat = "YYYY-MM-DD HH24"
+			break
+		case "day":
+			dateFormat = "YYYY-MM-DD"
+			break
+		case "month":
+			dateFormat = "YYYY-MM"
+			break
+		}
+
+		query := fmt.Sprintf(`SELECT a.*, 
+       	b.total_input_cdrs, 
+       	c.total_output_files,
+		c.total_output_cdrs,
+		c.total_output_bytes 
+		FROM   
+		(SELECT to_char(intime, '%s') as time, 
+				Count (*)  AS total_input_files, 
+               Sum(bytes) AS total_input_bytes 
+        FROM   audittraillogentry 
+        WHERE  event = 67 and trim(innodename) in %s
+		GROUP BY to_char(intime, '%s')) a,
+
+       (SELECT to_char(intime, '%s') as time,
+				COALESCE(Sum (cdrs), 0) AS total_input_cdrs 
+        FROM   audittraillogentry 
+        WHERE  event = 73 and trim(innodename) in %s 
+		GROUP BY to_char(intime, '%s')) b,  
+
+       (SELECT to_char(intime, '%s') as time,
+				Count(*)  AS total_output_files, 
+               Sum(cdrs) AS total_output_cdrs,
+               Sum(bytes) AS total_output_bytes 
+        FROM   audittraillogentry 
+        WHERE  event = 68 and trim(outnodename) in %s
+		GROUP BY to_char(intime, '%s')) c
+		WHERE a.time = b.time
+		AND b.time = c.time
+		ORDER BY a.time;`,
+			dateFormat,
+			collectorsInStatement,
+			dateFormat,
+			dateFormat,
+			collectorsInStatement,
+			dateFormat,
+			dateFormat,
+			distributorsInStatement,
+			dateFormat)
+
+		logger.WithFields(logrus.Fields{
+			"query": query,
+		}).Debug("GetGroupedStreamProcessedInOut query")
+
+		if session != nil {
+			rows, err := session.Db.Queryx(query)
+
+			if err != nil {
+				logger.WithFields(logrus.Fields{
+					"query": query,
+					"error": err,
+				}).Error("Stream grouped processed input/output")
+			} else {
+				return rows
+			}
+		}
+
+	} else {
+		logger.WithFields(logrus.Fields{
+			"stream": stream.Name,
+		}).Error("Stream not running in any logical server")
 	}
 
 	return nil

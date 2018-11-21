@@ -217,7 +217,8 @@ func (fileCfg *EMMFileConfig) validate() bool {
 								"logical_server": fileCfg.Clusters[index].LogicalServers[lsIndex].Name,
 							}).Warn("Missing 'username' field, will use cluster 'default_username'")
 
-							fileCfg.Clusters[index].LogicalServers[lsIndex].Username = fileCfg.Clusters[index].DefaultUsername
+							fileCfg.Clusters[index].LogicalServers[lsIndex].Username =
+								fileCfg.Clusters[index].DefaultUsername
 						}
 					}
 
@@ -233,7 +234,8 @@ func (fileCfg *EMMFileConfig) validate() bool {
 								"logical_server": fileCfg.Clusters[index].LogicalServers[lsIndex].Name,
 							}).Warn("Missing 'password' field, will use cluster 'default_password'")
 
-							fileCfg.Clusters[index].LogicalServers[lsIndex].Password = fileCfg.Clusters[index].DefaultPassword
+							fileCfg.Clusters[index].LogicalServers[lsIndex].Password =
+								fileCfg.Clusters[index].DefaultPassword
 						}
 					}
 				}
@@ -267,16 +269,22 @@ func (this LogicalServer) Equals(another *LogicalServer) bool {
 }
 
 type CmdArgs struct {
-	ip         string
-	username   string
-	password   string
-	port       string
-	reportType string
-	days       int8
-	dateRange  string
-	outputFile string
-	outputDir  string
-	logLevel   string
+	ip           string
+	username     string
+	password     string
+	port         string
+	reportType   string
+	days         int8
+	dateRange    string
+	outputFile   string
+	outputDir    string
+	logLevel     string
+	groupBy      string
+	fromDate     string
+	toDate       string
+	numberOfDay  string
+	outputFormat string
+	stream       string
 }
 
 func (cmdCfg CmdArgs) Ip() string {
@@ -295,6 +303,14 @@ func (cmdCfg CmdArgs) Port() string {
 	return cmdCfg.port
 }
 
+func (cmdCfg CmdArgs) Stream() string {
+	return cmdCfg.stream
+}
+
+func (cmdCfg CmdArgs) GroupBy() string {
+	return cmdCfg.groupBy
+}
+
 func (cmdCfg CmdArgs) String() string {
 	return fmt.Sprintf("IP:%s\nPort:%s\nUsername:%s\nPassword:%s\n", cmdCfg.ip,
 		cmdCfg.port,
@@ -311,9 +327,17 @@ func (cfg *CmdArgs) Parse() {
 	flag.StringVar(&cfg.username, "username", "mmsuper", "DB user name")
 	flag.StringVar(&cfg.password, "password", "thule", "DB user password")
 	flag.StringVar(&cfg.port, "port", "5432", "DB port")
-	flag.StringVar(&cfg.logLevel, "log_level", "Info", "Sets the logging level, [Debug, Info, Warn, Error, Fatal]")
-
+	flag.StringVar(&cfg.logLevel, "log-level", "Warn", "Sets the logging level, [Debug, Info, "+
+		"Warn, Error, Fatal]")
+	flag.StringVar(&cfg.groupBy, "group-by", "day", "Specifies the intervals for grouping of the "+
+		"result [minute, hour, day, month], default value is 'day'")
+	flag.StringVar(&cfg.fromDate, "from-date", "", "Specifies the start date for generation "+
+		"of the report, default value")
+	flag.StringVar(&cfg.outputFormat, "output-format", "table", "Specifies the format of the result [table, csv]")
+	flag.StringVar(&cfg.stream, "stream", "", "Stream name defined in the EMM configuration file")
 	flag.Parse()
+
+	// Validate command line args
 }
 
 type Stream struct {
