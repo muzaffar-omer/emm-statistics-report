@@ -269,22 +269,23 @@ func (this LogicalServer) Equals(another *LogicalServer) bool {
 }
 
 type CmdArgs struct {
-	ip           string
-	username     string
-	password     string
-	port         string
-	reportType   string
-	days         int8
-	dateRange    string
-	outputFile   string
-	outputDir    string
-	logLevel     string
-	groupBy      string
-	fromDate     string
-	toDate       string
-	numberOfDay  string
-	outputFormat string
-	stream       string
+	ip            string
+	username      string
+	password      string
+	port          string
+	reportType    string
+	days          int8
+	dateRange     string
+	outputFile    string
+	outputDir     string
+	logLevel      string
+	groupBy       string
+	fromDate      string
+	toDate        string
+	numberOfDay   string
+	outputFormat  string
+	stream        string
+	operationType int
 }
 
 func (cmdCfg CmdArgs) Ip() string {
@@ -322,6 +323,10 @@ func (cmdCfg CmdArgs) LogLevel() string {
 	return cmdCfg.logLevel
 }
 
+func (cmdCfg CmdArgs) OperationType() int {
+	return cmdCfg.operationType
+}
+
 func (cfg *CmdArgs) Parse() {
 	flag.StringVar(&cfg.ip, "ip", "localhost", "Postgresql DB instance IP address")
 	flag.StringVar(&cfg.username, "username", "mmsuper", "DB user name")
@@ -335,6 +340,11 @@ func (cfg *CmdArgs) Parse() {
 		"of the report, default value")
 	flag.StringVar(&cfg.outputFormat, "output-format", "table", "Specifies the format of the result [table, csv]")
 	flag.StringVar(&cfg.stream, "stream", "", "Stream name defined in the EMM configuration file")
+	flag.IntVar(&cfg.operationType, "query-type", 1, "Specifies the required type of query "+
+		"(operation), below are the possible values:"+
+		"1 - Requestion stream processed input/output grouped by minute, hour, day, or month, it requires the group-by "+
+		"parameter to be specified (default group-by value is day)")
+
 	flag.Parse()
 
 	// Validate command line args

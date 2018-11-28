@@ -2,6 +2,7 @@ package database
 
 import (
 	"fmt"
+	"strconv"
 )
 
 /*
@@ -39,12 +40,12 @@ type TableDescription struct {
 }
 
 type TotalProcessedInOut struct {
-	TotalInputFiles  string `db:"total_input_files"`
-	TotalInputBytes  string `db:"total_input_bytes"`
-	TotalInputCdrs   string `db:"total_input_cdrs"`
-	TotalOutputFiles string `db:"total_output_files"`
-	TotalOutputCdrs  string `db:"total_output_cdrs"`
-	TotalOutputBytes string `db:"total_output_bytes"`
+	TotalInputFiles  int `db:"total_input_files"`
+	TotalInputBytes  int `db:"total_input_bytes"`
+	TotalInputCdrs   int `db:"total_input_cdrs"`
+	TotalOutputFiles int `db:"total_output_files"`
+	TotalOutputCdrs  int `db:"total_output_cdrs"`
+	TotalOutputBytes int `db:"total_output_bytes"`
 }
 
 func (t TotalProcessedInOut) String() string {
@@ -63,8 +64,8 @@ func (t TotalProcessedInOut) String() string {
 		t.TotalOutputBytes)
 }
 
-func (t TotalProcessedInOut) AsArray() []string {
-	return []string{t.TotalInputFiles, t.TotalOutputBytes, t.TotalOutputCdrs, t.TotalInputFiles, t.TotalOutputCdrs,
+func (t TotalProcessedInOut) AsArray() []int {
+	return []int{t.TotalInputFiles, t.TotalOutputBytes, t.TotalOutputCdrs, t.TotalInputFiles, t.TotalOutputCdrs,
 		t.TotalOutputBytes}
 }
 
@@ -75,12 +76,12 @@ func (t TotalProcessedInOut) Header() []string {
 
 type TotalGroupedProcessedInOut struct {
 	Time             string `db:"time"`
-	TotalInputFiles  string `db:"total_input_files"`
-	TotalInputCdrs   string `db:"total_input_cdrs"`
-	TotalInputBytes  string `db:"total_input_bytes"`
-	TotalOutputFiles string `db:"total_output_files"`
-	TotalOutputCdrs  string `db:"total_output_cdrs"`
-	TotalOutputBytes string `db:"total_output_bytes"`
+	TotalInputFiles  int    `db:"total_input_files"`
+	TotalInputCdrs   int    `db:"total_input_cdrs"`
+	TotalInputBytes  int    `db:"total_input_bytes"`
+	TotalOutputFiles int    `db:"total_output_files"`
+	TotalOutputCdrs  int    `db:"total_output_cdrs"`
+	TotalOutputBytes int    `db:"total_output_bytes"`
 }
 
 func (t TotalGroupedProcessedInOut) String() string {
@@ -102,11 +103,29 @@ func (t TotalGroupedProcessedInOut) String() string {
 }
 
 func (t TotalGroupedProcessedInOut) AsArray() []string {
-	return []string{t.Time, t.TotalInputFiles, t.TotalInputCdrs, t.TotalInputBytes, t.TotalOutputFiles, t.TotalOutputCdrs,
-		t.TotalOutputBytes}
+	return []string{t.Time,
+		strconv.Itoa(t.TotalInputFiles),
+		strconv.Itoa(t.TotalInputCdrs),
+		strconv.Itoa(t.TotalInputBytes),
+		strconv.Itoa(t.TotalOutputFiles),
+		strconv.Itoa(t.TotalOutputCdrs),
+		strconv.Itoa(t.TotalOutputBytes)}
 }
 
 func (t TotalGroupedProcessedInOut) Header() []string {
 	return []string{"time", "total_input_files", "total_input_cdrs", "total_input_bytes", "total_output_files", "total_output_cdrs",
 		"total_output_bytes"}
+}
+
+func (t TotalGroupedProcessedInOut) GetStatisticsMap() map[string]int {
+	statsMap := make(map[string]int)
+
+	statsMap["Input Files"] = t.TotalInputFiles
+	statsMap["Input CDRs"] = t.TotalInputCdrs
+	statsMap["Input Bytes"] = t.TotalInputBytes
+	statsMap["Output Files"] = t.TotalOutputFiles
+	statsMap["Output CDRs"] = t.TotalOutputCdrs
+	statsMap["Output Bytes"] = t.TotalOutputBytes
+
+	return statsMap
 }
