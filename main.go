@@ -4,7 +4,6 @@ import (
 	config "emm-statistics-report/configuration"
 	"emm-statistics-report/database"
 	"emm-statistics-report/stats"
-	"fmt"
 	"github.com/olekukonko/tablewriter"
 	"github.com/sirupsen/logrus"
 	"os"
@@ -51,10 +50,10 @@ func OperationGroupedProcessedInOut() {
 			table.SetHeader(totalGroupedProcessedInOut.Header())
 			table.Render()
 
-			var sum map[string]int
+			var sum map[string]float64
 			var avg map[string]float64
-			var min map[string]int
-			var max map[string]int
+			var min map[string]float64
+			var max map[string]float64
 
 			sum, avg, min, max = stats.CalculateStats(statisticalRecords)
 
@@ -80,7 +79,7 @@ func OperationGroupedProcessedInOut() {
 					statsRow[0] = "Sum"
 
 					for colNum := 1; colNum < len(header); colNum += 1 {
-						statsRow[colNum] = fmt.Sprintf("%d", sum[header[colNum]])
+						statsRow[colNum] = database.GetFormattedNumber(sum[header[colNum]])
 					}
 
 					table.Append(statsRow)
@@ -89,7 +88,7 @@ func OperationGroupedProcessedInOut() {
 					statsRow[0] = "Avg"
 
 					for colNum := 1; colNum < len(header); colNum += 1 {
-						statsRow[colNum] = fmt.Sprintf("%f", avg[header[colNum]])
+						statsRow[colNum] = database.GetFormattedNumber(avg[header[colNum]])
 					}
 
 					table.Append(statsRow)
@@ -98,7 +97,7 @@ func OperationGroupedProcessedInOut() {
 					statsRow[0] = "Min"
 
 					for colNum := 1; colNum < len(header); colNum += 1 {
-						statsRow[colNum] = fmt.Sprintf("%d", min[header[colNum]])
+						statsRow[colNum] = database.GetFormattedNumber(min[header[colNum]])
 					}
 
 					table.Append(statsRow)
@@ -107,7 +106,7 @@ func OperationGroupedProcessedInOut() {
 					statsRow[0] = "Max"
 
 					for colNum := 1; colNum < len(header); colNum += 1 {
-						statsRow[colNum] = fmt.Sprintf("%d", max[header[colNum]])
+						statsRow[colNum] = database.GetFormattedNumber(max[header[colNum]])
 					}
 
 					table.Append(statsRow)

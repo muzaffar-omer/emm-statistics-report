@@ -332,7 +332,7 @@ func (cfg *CmdArgs) Parse() {
 	flag.StringVar(&cfg.username, "username", "mmsuper", "DB user name")
 	flag.StringVar(&cfg.password, "password", "thule", "DB user password")
 	flag.StringVar(&cfg.port, "port", "5432", "DB port")
-	flag.StringVar(&cfg.logLevel, "log-level", "Warn", "Sets the logging level, [Debug, Info, "+
+	flag.StringVar(&cfg.logLevel, "log-level", "Error", "Sets the logging level, [Debug, Info, "+
 		"Warn, Error, Fatal]")
 	flag.StringVar(&cfg.groupBy, "group-by", "day", "Specifies the intervals for grouping of the "+
 		"result [minute, hour, day, month], default value is 'day'")

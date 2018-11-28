@@ -2,6 +2,7 @@ package database
 
 import (
 	"fmt"
+	"regexp"
 	"strconv"
 )
 
@@ -106,26 +107,57 @@ func (t TotalGroupedProcessedInOut) AsArray() []string {
 	return []string{t.Time,
 		strconv.Itoa(t.TotalInputFiles),
 		strconv.Itoa(t.TotalInputCdrs),
-		strconv.Itoa(t.TotalInputBytes),
+		GetFormattedNumber(convertToMB(t.TotalInputBytes)),
 		strconv.Itoa(t.TotalOutputFiles),
 		strconv.Itoa(t.TotalOutputCdrs),
-		strconv.Itoa(t.TotalOutputBytes)}
+		GetFormattedNumber(convertToMB(t.TotalOutputBytes))}
 }
 
 func (t TotalGroupedProcessedInOut) Header() []string {
-	return []string{"time", "total_input_files", "total_input_cdrs", "total_input_bytes", "total_output_files", "total_output_cdrs",
-		"total_output_bytes"}
+	return []string{"time", "total_input_files", "total_input_cdrs", "total_input_bytes_mb", "total_output_files", "total_output_cdrs",
+		"total_output_bytes_mb"}
 }
 
-func (t TotalGroupedProcessedInOut) GetStatisticsMap() map[string]int {
-	statsMap := make(map[string]int)
+func (t TotalGroupedProcessedInOut) GetStatisticsMap() map[string]float64 {
+	statsMap := make(map[string]float64)
 
-	statsMap["Input Files"] = t.TotalInputFiles
-	statsMap["Input CDRs"] = t.TotalInputCdrs
-	statsMap["Input Bytes"] = t.TotalInputBytes
-	statsMap["Output Files"] = t.TotalOutputFiles
-	statsMap["Output CDRs"] = t.TotalOutputCdrs
-	statsMap["Output Bytes"] = t.TotalOutputBytes
+	statsMap["Input Files"] = float64(t.TotalInputFiles)
+	statsMap["Input CDRs"] = float64(t.TotalInputCdrs)
+	statsMap["Input Bytes (MB)"] = convertToMB(t.TotalInputBytes)
+	statsMap["Output Files"] = float64(t.TotalOutputFiles)
+	statsMap["Output CDRs"] = float64(t.TotalOutputCdrs)
+	statsMap["Output Bytes (MB)"] = convertToMB(t.TotalOutputBytes)
 
 	return statsMap
+}
+
+func convertToMB(bytes int) float64 {
+	return float64(bytes) / (1024 * 1024)
+}
+
+func GetFormattedNumber(number float64) string {
+	if IsActualFloat(number) {
+		return fmt.Sprintf("%f", number)
+	} else {
+		return fmt.Sprintf("%.0f", number)
+	}
+}
+
+func IsActualFloat(number float64) bool {
+	floatFormat := regexp.MustCompile("\\.([0-9]+)$")
+
+	precisions := floatFormat.FindStringSubmatch(fmt.Sprintf("%f", number))
+
+	if len(precisions) > 0 {
+
+		precisionVal, err := strconv.Atoi(precisions[len(precisions)-1])
+
+		if err != nil {
+			fmt.Printf("%s\n", err)
+		} else if precisionVal > 0 {
+			return true
+		}
+	}
+
+	return false
 }
