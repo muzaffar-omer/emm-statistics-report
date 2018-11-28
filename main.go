@@ -35,6 +35,7 @@ func main() {
 
 		if rows != nil {
 			for rows.Next() {
+				totalGroupedProcessedInOut = database.TotalGroupedProcessedInOut{}
 				rows.StructScan(&totalGroupedProcessedInOut)
 				table.Append(totalGroupedProcessedInOut.AsArray())
 			}

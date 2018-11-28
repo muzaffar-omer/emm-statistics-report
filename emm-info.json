@@ -32,6 +32,15 @@
       "distributors": [
         "AIR_BIR_OUT"
       ]
+    },
+    {
+      "name": "FTTH_AAA",
+      "collectors": [
+        "AAA_BROADBAND_COL"
+      ],
+      "distributors": [
+        "BI_OUT_CSV"
+      ]
     }
   ],
   "clusters": [
@@ -53,6 +62,20 @@
           "database": "fm_db_Server3",
           "port": "5472",
           "active_stream": "AIR_UAT"
+        }
+      ]
+    },
+    {
+      "default_username": "mmsuper",
+      "default_password": "mediation",
+      "name": "RYD1",
+      "logical_servers": [
+        {
+          "name": "Server22",
+          "ip": "10.135.16.12",
+          "database": "fm_db_Server22",
+          "port": "7005",
+          "active_stream": "FTTH_AAA"
         }
       ]
     }
