@@ -7,6 +7,7 @@ import (
 	"github.com/sirupsen/logrus"
 	"io/ioutil"
 	"os"
+	"regexp"
 )
 
 /*
@@ -41,6 +42,7 @@ var (
 var logger = logrus.New()
 
 const CONFIG_FILE_NAME = "emm-info.json"
+const STREAM_MAP_FORMAT = "(\\w+)@(\\w+):(\\w+)"
 
 func Log() *logrus.Logger {
 	return logger
@@ -119,6 +121,25 @@ func init() {
 	}
 }
 
+func isValidStreamMapFormat(streamMap string) bool {
+	// Stream Map Format : <Stream Name>@<Cluster Name>:<Logical Server Name>
+	return regexp.MustCompile(STREAM_MAP_FORMAT).MatchString(streamMap)
+}
+
+func extractStreamMapParams(streamMap string) (streamName, clusterName, logicalServerName string) {
+	destructuredStreamMap := regexp.MustCompile(STREAM_MAP_FORMAT).FindAllStringSubmatch(streamMap, -1)
+
+	if isValidStreamMapFormat(streamMap) && len(destructuredStreamMap) == 1 && len(destructuredStreamMap[0]) > 1 {
+		streamName = destructuredStreamMap[0][1]        // Stream Name
+		clusterName = destructuredStreamMap[0][2]       // Cluster Name
+		logicalServerName = destructuredStreamMap[0][3] // Logical Server Name
+	} else {
+		streamName, clusterName, logicalServerName = "", "", ""
+	}
+
+	return
+}
+
 func (fileCfg *EMMFileConfig) validate() bool {
 
 	// Validate streams
@@ -134,6 +155,19 @@ func (fileCfg *EMMFileConfig) validate() bool {
 		// Check missing stream names
 		if stream.Name == "" {
 			logger.Error("Missing stream name, check that 'name' field is defined for all streams")
+		}
+	}
+
+	// Validate stream mapping
+	for index, streamMap := range fileCfg.StreamMapping {
+
+		if !isValidStreamMapFormat(streamMap) {
+			logger.WithFields(logrus.Fields{
+				"stream_map": streamMap,
+			}).Error("Invalid stream mapping, will be ignored")
+
+			// Remove streamMap from StreamMapping array
+			fileCfg.StreamMapping = append(fileCfg.StreamMapping[:index], fileCfg.StreamMapping[index+1:]...)
 		}
 	}
 
@@ -245,6 +279,24 @@ func (fileCfg *EMMFileConfig) validate() bool {
 	}
 
 	return true
+}
+
+func (fileCfg EMMFileConfig) getLogicalServer(clusterName string, logicalServerName string) *LogicalServer {
+
+	//fmt.Printf("Looking for %s in %s", clusterName, logicalServerName)
+	for _, cluster := range FileConfig.Clusters {
+
+		if cluster.Name == clusterName {
+			for _, ls := range cluster.LogicalServers {
+				if ls.Name == logicalServerName {
+					return &ls
+				}
+			}
+		}
+
+	}
+
+	return nil
 }
 
 type LogicalServer struct {
@@ -364,17 +416,21 @@ type Cluster struct {
 }
 
 type EMMFileConfig struct {
-	Streams  []Stream  `json:"streams"`
-	Clusters []Cluster `json:"clusters"`
+	Streams       []Stream  `json:"streams"`
+	Clusters      []Cluster `json:"clusters"`
+	StreamMapping []string  `json:"stream_mapping"`
 }
 
 func FindLsRunningStream(stream *Stream) *LogicalServer {
 
-	for _, cluster := range FileConfig.Clusters {
-		for _, ls := range cluster.LogicalServers {
-			if ls.ActiveStream == stream.Name {
-				return &ls
-			}
+	for _, streamMap := range FileConfig.StreamMapping {
+		streamName, clusterName, logicalServerName := extractStreamMapParams(streamMap)
+
+		//fmt.Println(streamMap)
+
+		//fmt.Printf("%s, %s, %s\n", streamName, clusterName, logicalServerName)
+		if streamName == stream.Name {
+			return FileConfig.getLogicalServer(clusterName, logicalServerName)
 		}
 	}
 

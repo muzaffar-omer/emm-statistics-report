@@ -43,6 +43,9 @@
       ]
     }
   ],
+  "stream_mapping" : [
+    "AIR_UAT@TEST:Server3"
+  ],
   "clusters": [
     {
       "default_username": "mmsuper",
@@ -53,15 +56,13 @@
           "name": "Server5",
           "ip": "10.135.5.81",
           "database": "fm_db_Server5",
-          "port": "5781",
-          "active_stream": "SMSC_IC"
+          "port": "5781"
         },
         {
           "name": "Server3",
           "ip": "10.135.5.81",
           "database": "fm_db_Server3",
-          "port": "5472",
-          "active_stream": "AIR_UAT"
+          "port": "5472"
         }
       ]
     },
@@ -74,8 +75,7 @@
           "name": "Server22",
           "ip": "10.135.16.12",
           "database": "fm_db_Server22",
-          "port": "7005",
-          "active_stream": "FTTH_AAA"
+          "port": "7005"
         }
       ]
     }
