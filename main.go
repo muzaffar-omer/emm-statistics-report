@@ -4,6 +4,7 @@ import (
 	config "emm-statistics-report/configuration"
 	"emm-statistics-report/database"
 	"emm-statistics-report/stats"
+	"fmt"
 	"github.com/olekukonko/tablewriter"
 	"github.com/sirupsen/logrus"
 	"os"
@@ -24,6 +25,8 @@ func main() {
 	default:
 		OperationGroupedProcessedInOut()
 	}
+
+	fmt.Println("Test CI/CD 1 ...")
 }
 
 // Possible operations:
