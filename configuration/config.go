@@ -8,6 +8,7 @@ import (
 	"io/ioutil"
 	"os"
 	"regexp"
+	"time"
 )
 
 /*
@@ -393,7 +394,18 @@ func (cmdCfg CmdArgs) OperationType() int {
 	return cmdCfg.operationType
 }
 
+func (cmdCfg CmdArgs) FromDate() string {
+	return cmdCfg.fromDate
+}
+
+func (cmdCfg CmdArgs) ToDate() string {
+	return cmdCfg.toDate
+}
+
 func (cfg *CmdArgs) Parse() {
+
+	currentTime := time.Now()
+
 	flag.StringVar(&cfg.ip, "ip", "localhost", "Postgresql DB instance IP address")
 	flag.StringVar(&cfg.username, "username", "mmsuper", "DB user name")
 	flag.StringVar(&cfg.password, "password", "thule", "DB user password")
@@ -402,10 +414,10 @@ func (cfg *CmdArgs) Parse() {
 		"Warn, Error, Fatal]")
 	flag.StringVar(&cfg.groupBy, "group-by", "day", "Specifies the intervals for grouping of the "+
 		"result [minute, hour, day, month], default value is 'day'")
-	flag.StringVar(&cfg.fromDate, "from-date", "", "Specifies the start date for generation "+
-		"of the report")
-	flag.StringVar(&cfg.toDate, "to-date", "", "Specifies the end date for generation "+
-		"of the report")
+	flag.StringVar(&cfg.fromDate, "from-date", "19700101", "Specifies the start date for generation "+
+		"of the report in the format YYYYMMDD")
+	flag.StringVar(&cfg.toDate, "to-date", currentTime.Format("20060102"), "Specifies the end date for generation "+
+		"of the report in the format YYYYMMDD")
 	flag.StringVar(&cfg.outputFormat, "output-format", "table", "Specifies the format of the result [table, csv]")
 	flag.StringVar(&cfg.stream, "stream", "", "Stream name defined in the EMM configuration file")
 	flag.IntVar(&cfg.operationType, "query-type", 1, "Specifies the required type of query "+
@@ -414,6 +426,10 @@ func (cfg *CmdArgs) Parse() {
 		"parameter to be specified (default group-by value is day)")
 
 	flag.Parse()
+
+	if len(flag.Args()) == 0 {
+		flag.Usage()
+	}
 
 	// Validate command line args
 }

@@ -7,6 +7,7 @@ import (
 	"github.com/olekukonko/tablewriter"
 	"github.com/sirupsen/logrus"
 	"os"
+	"time"
 )
 
 var logger = config.Log()
@@ -40,11 +41,36 @@ func OperationGroupedProcessedInOut() {
 
 	if stream := config.GetStreamInfo(config.CmdConfig.Stream()); stream != nil {
 
+		var fromDate time.Time
+		var toDate time.Time
+
 		logger.WithFields(logrus.Fields{
 			"stream_name": config.CmdConfig.Stream(),
 		}).Debug("Stream is defined in configuration file")
 
-		rows := database.GetGroupedStreamProcessedInOut(stream, config.CmdConfig.GroupBy())
+		tmpDate, err := database.ConvertCmdDateToTime(config.CmdConfig.FromDate())
+
+		if err != nil {
+			logger.WithFields(logrus.Fields{
+				"from-date": config.CmdConfig.FromDate(),
+				"error":     err,
+			}).Panic("Could no convert provided date into internal time format")
+		} else {
+			fromDate = tmpDate
+		}
+
+		tmpDate, err = database.ConvertCmdDateToTime(config.CmdConfig.ToDate())
+
+		if err != nil {
+			logger.WithFields(logrus.Fields{
+				"to-date": config.CmdConfig.FromDate(),
+				"error":   err,
+			}).Panic("Could no convert provided date into internal time format")
+		} else {
+			toDate = tmpDate
+		}
+
+		rows := database.GetStreamProcessedInOut(stream, config.CmdConfig.GroupBy(), fromDate, toDate)
 
 		if rows != nil {
 
