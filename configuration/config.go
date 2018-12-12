@@ -405,7 +405,6 @@ func (cmdCfg CmdArgs) ToDate() string {
 func (cfg *CmdArgs) Parse() {
 	lastDay := time.Unix(time.Now().Unix()-(24*60*60), 0)
 
-	fmt.Println(lastDay)
 	flag.StringVar(&cfg.ip, "ip", "localhost", "Postgresql DB instance IP address")
 	flag.StringVar(&cfg.username, "username", "mmsuper", "DB user name")
 	flag.StringVar(&cfg.password, "password", "thule", "DB user password")
