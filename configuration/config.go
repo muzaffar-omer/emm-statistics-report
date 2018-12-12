@@ -429,6 +429,7 @@ func (cfg *CmdArgs) Parse() {
 
 	if len(flag.Args()) == 0 {
 		flag.Usage()
+		os.Exit(-1)
 	}
 
 	// Validate command line args
