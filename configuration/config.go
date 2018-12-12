@@ -403,9 +403,9 @@ func (cmdCfg CmdArgs) ToDate() string {
 }
 
 func (cfg *CmdArgs) Parse() {
+	lastDay := time.Unix(time.Now().Unix()-(24*60*60), 0)
 
-	currentTime := time.Now()
-
+	fmt.Println(lastDay)
 	flag.StringVar(&cfg.ip, "ip", "localhost", "Postgresql DB instance IP address")
 	flag.StringVar(&cfg.username, "username", "mmsuper", "DB user name")
 	flag.StringVar(&cfg.password, "password", "thule", "DB user password")
@@ -416,7 +416,7 @@ func (cfg *CmdArgs) Parse() {
 		"result [minute, hour, day, month], default value is 'day'")
 	flag.StringVar(&cfg.fromDate, "from-date", "19700101", "Specifies the start date for generation "+
 		"of the report in the format YYYYMMDD")
-	flag.StringVar(&cfg.toDate, "to-date", currentTime.Format("20060102"), "Specifies the end date for generation "+
+	flag.StringVar(&cfg.toDate, "to-date", lastDay.Format("20060102"), "Specifies the end date for generation "+
 		"of the report in the format YYYYMMDD")
 	flag.StringVar(&cfg.outputFormat, "output-format", "table", "Specifies the format of the result [table, csv]")
 	flag.StringVar(&cfg.stream, "stream", "", "Stream name defined in the EMM configuration file")
@@ -427,7 +427,7 @@ func (cfg *CmdArgs) Parse() {
 
 	flag.Parse()
 
-	if len(flag.Args()) == 0 {
+	if len(os.Args) < 2 {
 		flag.Usage()
 		os.Exit(-1)
 	}
