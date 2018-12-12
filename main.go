@@ -9,9 +9,9 @@ import (
 	"os"
 )
 
-func main() {
+var logger = config.Log()
 
-	logger := config.Log()
+func main() {
 
 	logger.SetFormatter(&logrus.TextFormatter{
 		DisableColors: true,
@@ -34,7 +34,15 @@ func OperationGroupedProcessedInOut() {
 
 	table := tablewriter.NewWriter(os.Stdout)
 
+	logger.WithFields(logrus.Fields{
+		"stream_name": config.CmdConfig.Stream(),
+	}).Debug("Generating OperationGroupedProcessedInOut report")
+
 	if stream := config.GetStreamInfo(config.CmdConfig.Stream()); stream != nil {
+
+		logger.WithFields(logrus.Fields{
+			"stream_name": config.CmdConfig.Stream(),
+		}).Debug("Stream is defined in configuration file")
 
 		rows := database.GetGroupedStreamProcessedInOut(stream, config.CmdConfig.GroupBy())
 
@@ -50,69 +58,7 @@ func OperationGroupedProcessedInOut() {
 			table.SetHeader(totalGroupedProcessedInOut.Header())
 			table.Render()
 
-			var sum map[string]float64
-			var avg map[string]float64
-			var min map[string]float64
-			var max map[string]float64
-
-			sum, avg, min, max = stats.CalculateStats(statisticalRecords)
-
-			table = tablewriter.NewWriter(os.Stdout)
-
-			// Create header
-			header := make([]string, 0, len(sum)+1)
-			header = append(header, "")
-
-			for key, _ := range sum {
-				header = append(header, key)
-			}
-			table.SetHeader(header)
-
-			var statsRow []string
-
-			// Fill table data
-			for rowNum := 0; rowNum < 4; rowNum += 1 {
-
-				// Fill summations row
-				if rowNum == 0 {
-					statsRow = make([]string, len(header))
-					statsRow[0] = "Sum"
-
-					for colNum := 1; colNum < len(header); colNum += 1 {
-						statsRow[colNum] = database.GetFormattedNumber(sum[header[colNum]])
-					}
-
-					table.Append(statsRow)
-				} else if rowNum == 1 { // Fill average row
-					statsRow = make([]string, len(header))
-					statsRow[0] = "Avg"
-
-					for colNum := 1; colNum < len(header); colNum += 1 {
-						statsRow[colNum] = database.GetFormattedNumber(avg[header[colNum]])
-					}
-
-					table.Append(statsRow)
-				} else if rowNum == 2 { // Fill min row
-					statsRow = make([]string, len(header))
-					statsRow[0] = "Min"
-
-					for colNum := 1; colNum < len(header); colNum += 1 {
-						statsRow[colNum] = database.GetFormattedNumber(min[header[colNum]])
-					}
-
-					table.Append(statsRow)
-				} else if rowNum == 3 { // Fill max row
-					statsRow = make([]string, len(header))
-					statsRow[0] = "Max"
-
-					for colNum := 1; colNum < len(header); colNum += 1 {
-						statsRow[colNum] = database.GetFormattedNumber(max[header[colNum]])
-					}
-
-					table.Append(statsRow)
-				}
-			}
-
+			table = stats.CreateStatisticsTable(statisticalRecords)
 			table.Render()
 		}
 	}

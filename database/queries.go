@@ -308,6 +308,11 @@ func createSQLInStatement(inStatElements []string) string {
 
 	inStatement := ""
 
+	// In case there are no collectors or distributors, return empty quoted string
+	if len(inStatElements) == 0 {
+		inStatement = "''"
+	}
+
 	for index, element := range inStatElements {
 		inStatement += fmt.Sprintf("'%s'", element)
 

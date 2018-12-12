@@ -282,11 +282,28 @@ func (fileCfg *EMMFileConfig) validate() bool {
 // logical server object
 func (fileCfg EMMFileConfig) getLogicalServer(clusterName string, logicalServerName string) *LogicalServer {
 
+	logger.WithFields(logrus.Fields{
+		"logical_name": logicalServerName,
+		"cluster_name": clusterName,
+	}).Debug("Looking for logical server")
+
 	for _, cluster := range FileConfig.Clusters {
 
 		if cluster.Name == clusterName {
+
+			logger.WithFields(logrus.Fields{
+				"logical_name": logicalServerName,
+				"cluster_name": clusterName,
+			}).Debug("Found the cluster")
+
 			for _, ls := range cluster.LogicalServers {
 				if ls.Name == logicalServerName {
+
+					logger.WithFields(logrus.Fields{
+						"logical_name": logicalServerName,
+						"cluster_name": clusterName,
+					}).Debug("Found the logical server")
+
 					return &ls
 				}
 			}
@@ -386,7 +403,9 @@ func (cfg *CmdArgs) Parse() {
 	flag.StringVar(&cfg.groupBy, "group-by", "day", "Specifies the intervals for grouping of the "+
 		"result [minute, hour, day, month], default value is 'day'")
 	flag.StringVar(&cfg.fromDate, "from-date", "", "Specifies the start date for generation "+
-		"of the report, default value")
+		"of the report")
+	flag.StringVar(&cfg.toDate, "to-date", "", "Specifies the end date for generation "+
+		"of the report")
 	flag.StringVar(&cfg.outputFormat, "output-format", "table", "Specifies the format of the result [table, csv]")
 	flag.StringVar(&cfg.stream, "stream", "", "Stream name defined in the EMM configuration file")
 	flag.IntVar(&cfg.operationType, "query-type", 1, "Specifies the required type of query "+
@@ -428,10 +447,20 @@ type EMMFileConfig struct {
 // streamName
 func FindLsRunningStream(stream *Stream) *LogicalServer {
 
+	logger.WithFields(logrus.Fields{
+		"stream": stream.Name,
+	}).Debug("Looking for the logical server where this stream is assigned")
+
 	for _, streamMap := range FileConfig.StreamMapping {
 		streamName, clusterName, logicalServerName := extractStreamMapParams(streamMap)
 
 		if streamName == stream.Name {
+
+			logger.WithFields(logrus.Fields{
+				"stream":         stream.Name,
+				"stream_mapping": streamMap,
+			}).Debug("Found stream mapping definition")
+
 			return FileConfig.getLogicalServer(clusterName, logicalServerName)
 		}
 	}
