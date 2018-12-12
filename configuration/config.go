@@ -36,7 +36,7 @@ import (
 */
 
 const CONFIG_FILE_NAME = "emm-info.json"
-const STREAM_MAP_FORMAT = "(\\w+)@(\\w+):(\\w+)"
+const STREAM_MAP_FORMAT = "(\\w+){1}@{1}(\\w+){1}:{1}(\\w+){1}"
 
 var (
 	FileConfig EMMFileConfig // contains objects parsed from emm-info.json configuration file
