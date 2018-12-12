@@ -420,8 +420,8 @@ func (cfg *CmdArgs) Parse() {
 	flag.StringVar(&cfg.outputFormat, "output-format", "table", "Specifies the format of the result [table, csv]")
 	flag.StringVar(&cfg.stream, "stream", "", "Stream name defined in the EMM configuration file")
 	flag.IntVar(&cfg.operationType, "query-type", 1, "Specifies the required type of query "+
-		"(operation), below are the possible values:"+
-		"1 - Requestion stream processed input/output grouped by minute, hour, day, or month, it requires the group-by "+
+		"(operation), below are the possible values:\n"+
+		"1 - Stream processed input/output grouped by minute, hour, day, or month, it requires the group-by "+
 		"parameter to be specified (default group-by value is day)")
 
 	flag.Parse()
