@@ -37,6 +37,7 @@ import (
 
 const CONFIG_FILE_NAME = "emm-info.json"
 const STREAM_MAP_FORMAT = "(\\w+){1}@{1}(\\w+){1}:{1}(\\w+){1}"
+const LOGICAL_SERVER_MAP_FORMAT = "(\\w+){1}@{1}(\\w+){1}"
 
 var (
 	FileConfig EMMFileConfig // contains objects parsed from emm-info.json configuration file
@@ -138,6 +139,24 @@ func extractStreamMapParams(streamMap string) (streamName, clusterName, logicalS
 		logicalServerName = destructuredStreamMap[0][3] // Logical Server Name
 	} else {
 		streamName, clusterName, logicalServerName = "", "", ""
+	}
+
+	return
+}
+
+func isValidLogicalServerMapFormat(logicalServerMap string) bool {
+	// Stream Map Format : <Stream Name>@<Cluster Name>:<Logical Server Name>
+	return regexp.MustCompile(LOGICAL_SERVER_MAP_FORMAT).MatchString(logicalServerMap)
+}
+
+func extractLogicalServerMapParams(logicalServerMap string) (clusterName, logicalServerName string) {
+	destructuredStreamMap := regexp.MustCompile(LOGICAL_SERVER_MAP_FORMAT).FindAllStringSubmatch(logicalServerMap, -1)
+
+	if isValidLogicalServerMapFormat(logicalServerMap) && len(destructuredStreamMap) == 1 && len(destructuredStreamMap[0]) > 1 {
+		logicalServerName = destructuredStreamMap[0][1]
+		clusterName = destructuredStreamMap[0][2]
+	} else {
+		clusterName, logicalServerName = "", ""
 	}
 
 	return
@@ -353,6 +372,7 @@ type CmdArgs struct {
 	outputFormat  string
 	stream        string
 	operationType int
+	logicalServer string
 }
 
 func (cmdCfg CmdArgs) Ip() string {
@@ -402,6 +422,10 @@ func (cmdCfg CmdArgs) ToDate() string {
 	return cmdCfg.toDate
 }
 
+func (cmdCfg CmdArgs) LogicalServer() string {
+	return cmdCfg.logicalServer
+}
+
 func (cfg *CmdArgs) Parse() {
 	lastDay := time.Unix(time.Now().Unix()-(24*60*60), 0)
 
@@ -422,7 +446,10 @@ func (cfg *CmdArgs) Parse() {
 	flag.IntVar(&cfg.operationType, "query-type", 1, "Specifies the required type of query "+
 		"(operation), below are the possible values:\n"+
 		"1 - Stream processed input/output grouped by minute, hour, day, or month, it requires the group-by "+
-		"parameter to be specified (default group-by value is day)")
+		"parameter to be specified (default group-by value is day)"+
+		"2 - Logical server processed input/output grouped by minute, hour, day, or month, it requires the group-by "+
+		"parameter to be specified (default group-by value is day), requires setting --ls parameter")
+	flag.StringVar(&cfg.logicalServer, "ls", "", "Logical server name in format Server1@RYD1")
 
 	flag.Parse()
 
@@ -501,6 +528,35 @@ func GetStreamInfo(streamName string) *Stream {
 	logger.WithFields(logrus.Fields{
 		"stream": streamName,
 	}).Error("Stream not found")
+
+	return nil
+}
+
+func GetLogicalServerInfo(logicalServerNameMap string) *LogicalServer {
+
+	clusterName, logicalServerName := extractLogicalServerMapParams(logicalServerNameMap)
+
+	logger.WithFields(logrus.Fields{
+		"clusterName":          clusterName,
+		"logicalServerName":    logicalServerName,
+		"logicalServerNameMap": logicalServerNameMap,
+	}).Debug("Parameters extracted from logical server name map")
+
+	for _, cluster := range FileConfig.Clusters {
+
+		if cluster.Name == clusterName {
+
+			for _, logicalServer := range cluster.LogicalServers {
+				if logicalServer.Name == logicalServerName {
+					return &logicalServer
+				}
+			}
+		}
+	}
+
+	logger.WithFields(logrus.Fields{
+		"logical_server": logicalServerNameMap,
+	}).Error("Logical server not found")
 
 	return nil
 }
