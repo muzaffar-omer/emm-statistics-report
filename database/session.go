@@ -1,8 +1,9 @@
 package database
 
 import (
-	config "emm-statistics-report/configuration"
 	"fmt"
+
+	config "github.com/muzaffar-omer/emm-statistics-report/configuration"
 	log "github.com/sirupsen/logrus"
 
 	"github.com/jmoiron/sqlx"

@@ -1,9 +1,10 @@
 package stats
 
 import (
-	"emm-statistics-report/database"
-	"github.com/olekukonko/tablewriter"
 	"os"
+
+	"github.com/muzaffar-omer/emm-statistics-report/database"
+	"github.com/olekukonko/tablewriter"
 )
 
 type Statistical interface {

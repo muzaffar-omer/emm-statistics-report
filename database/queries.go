@@ -1,11 +1,12 @@
 package database
 
 import (
-	config "emm-statistics-report/configuration"
 	"fmt"
-	"github.com/jmoiron/sqlx"
-	"github.com/sirupsen/logrus"
 	"time"
+
+	"github.com/jmoiron/sqlx"
+	config "github.com/muzaffar-omer/emm-statistics-report/configuration"
+	"github.com/sirupsen/logrus"
 )
 
 const DB_DATE_FORMAT = "YYYY-MM-DD"

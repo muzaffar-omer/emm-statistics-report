@@ -1,13 +1,16 @@
 package main
 
 import (
-	config "emm-statistics-report/configuration"
-	"emm-statistics-report/database"
-	"emm-statistics-report/stats"
-	"github.com/olekukonko/tablewriter"
-	"github.com/sirupsen/logrus"
 	"os"
 	"time"
+
+	"github.com/muzaffar-omer/emm-statistics-report/stats"
+
+	"github.com/muzaffar-omer/emm-statistics-report/database"
+
+	config "github.com/muzaffar-omer/emm-statistics-report/configuration"
+	"github.com/olekukonko/tablewriter"
+	"github.com/sirupsen/logrus"
 )
 
 var logger = config.Log()
