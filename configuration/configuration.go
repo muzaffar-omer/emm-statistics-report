@@ -4,44 +4,27 @@ import (
 	"encoding/json"
 	"flag"
 	"fmt"
-	"github.com/sirupsen/logrus"
 	"io/ioutil"
 	"os"
 	"regexp"
 	"time"
+
+	"github.com/sirupsen/logrus"
 )
 
-/*
-	Contains the configuration parameters passed in the command line, also includes the parameters defined in the
-	configuration file:
-	- connection details:
-		- DB IP
-		- username
-		- password
-		- port
-	- specify server details JSON files
-	- report type
-		- input cdrs
-		- input files
-		- output cdrs
-		- output files
-	- days
-	- daterange
-	- output file
-	- output directory
-	- keep configuration in JSON file:
-		- list of logical servers
-		- output directory
-		- output file
-*/
+const configFileName = "emm-info.json"
 
-const CONFIG_FILE_NAME = "emm-info.json"
-const STREAM_MAP_FORMAT = "(\\w+){1}@{1}(\\w+){1}:{1}(\\w+){1}"
-const LOGICAL_SERVER_MAP_FORMAT = "(\\w+){1}@{1}(\\w+){1}"
+// Stream mapping format : <Stream Name>@<Cluster Name>:<Logical Server Name>
+const streamMapFormat = "^\\ ?(\\w+){1}@{1}(\\w+){1}:{1}\\ ?(\\w+){1}\\ ?$"
+
+const logicalServerMapFormat = "(\\w+){1}@{1}(\\w+){1}"
 
 var (
-	FileConfig EMMFileConfig // contains objects parsed from emm-info.json configuration file
-	CmdConfig  CmdArgs       // contains the possible command line arguments that could be provided by the user
+	// FileConfig contains objects parsed from emm-info.json configuration file
+	FileConfig EMMFileConfig
+
+	// CmdConfig contains the possible command line arguments that could be provided by the user
+	CmdConfig CmdArgs
 )
 
 var logger = logrus.New()
@@ -75,7 +58,7 @@ func init() {
 	}).Debug("Setting log level")
 
 	// Parse EMM configuration file
-	jsonFile, err := os.Open(CONFIG_FILE_NAME)
+	jsonFile, err := os.Open(configFileName)
 
 	defer jsonFile.Close()
 
@@ -125,13 +108,13 @@ func init() {
 
 func isValidStreamMapFormat(streamMap string) bool {
 	// Stream Map Format : <Stream Name>@<Cluster Name>:<Logical Server Name>
-	return regexp.MustCompile(STREAM_MAP_FORMAT).MatchString(streamMap)
+	return regexp.MustCompile(streamMapFormat).MatchString(streamMap)
 }
 
 // Parses a stream mapping and extracts the streamName, clusterName, logicalServerName
 // from the parsed string
 func extractStreamMapParams(streamMap string) (streamName, clusterName, logicalServerName string) {
-	destructuredStreamMap := regexp.MustCompile(STREAM_MAP_FORMAT).FindAllStringSubmatch(streamMap, -1)
+	destructuredStreamMap := regexp.MustCompile(streamMapFormat).FindAllStringSubmatch(streamMap, -1)
 
 	if isValidStreamMapFormat(streamMap) && len(destructuredStreamMap) == 1 && len(destructuredStreamMap[0]) > 1 {
 		streamName = destructuredStreamMap[0][1]        // Stream Name
@@ -146,11 +129,11 @@ func extractStreamMapParams(streamMap string) (streamName, clusterName, logicalS
 
 func isValidLogicalServerMapFormat(logicalServerMap string) bool {
 	// Stream Map Format : <Stream Name>@<Cluster Name>:<Logical Server Name>
-	return regexp.MustCompile(LOGICAL_SERVER_MAP_FORMAT).MatchString(logicalServerMap)
+	return regexp.MustCompile(logicalServerMapFormat).MatchString(logicalServerMap)
 }
 
 func extractLogicalServerMapParams(logicalServerMap string) (clusterName, logicalServerName string) {
-	destructuredStreamMap := regexp.MustCompile(LOGICAL_SERVER_MAP_FORMAT).FindAllStringSubmatch(logicalServerMap, -1)
+	destructuredStreamMap := regexp.MustCompile(logicalServerMapFormat).FindAllStringSubmatch(logicalServerMap, -1)
 
 	if isValidLogicalServerMapFormat(logicalServerMap) && len(destructuredStreamMap) == 1 && len(destructuredStreamMap[0]) > 1 {
 		logicalServerName = destructuredStreamMap[0][1]
@@ -169,7 +152,7 @@ func (fileCfg *EMMFileConfig) validate() bool {
 	// Validate streams
 	// 1 - Check there are streams defined
 	if len(fileCfg.Streams) == 0 {
-		logger.Error("No streams defined in " + CONFIG_FILE_NAME + ", check 'name' field is defined under" +
+		logger.Error("No streams defined in " + configFileName + ", check 'name' field is defined under" +
 			" main configuration file structure")
 	}
 
@@ -197,7 +180,7 @@ func (fileCfg *EMMFileConfig) validate() bool {
 
 	// Validate clusters information
 	if len(fileCfg.Clusters) == 0 {
-		logger.Error("No clusters defined in " + CONFIG_FILE_NAME + ", check that 'clusters' field is defined" +
+		logger.Error("No clusters defined in " + configFileName + ", check that 'clusters' field is defined" +
 			"under the main configuration file structure")
 	} else {
 		for index, _ := range fileCfg.Clusters {
@@ -485,7 +468,7 @@ type EMMFileConfig struct {
 	StreamMapping []string  `json:"stream_mapping"` // list of streams mapped to logical servers and their clusters
 }
 
-// Looks in the stream_mapping defined in the configuration file
+// FindLsRunningStream Looks in the stream_mapping defined in the configuration file
 // and finds the logical server which is running Stream based on
 // streamName
 func FindLsRunningStream(stream *Stream) *LogicalServer {
@@ -511,7 +494,7 @@ func FindLsRunningStream(stream *Stream) *LogicalServer {
 	return nil
 }
 
-// Looks in the streams defined in the configuration file, and returns the
+// GetStreamInfo Looks in the streams defined in the configuration file, and returns the
 // Stream object matching the streamName
 func GetStreamInfo(streamName string) *Stream {
 
