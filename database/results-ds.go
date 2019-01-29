@@ -51,12 +51,12 @@ type TotalProcessedInOut struct {
 
 func (t TotalProcessedInOut) String() string {
 
-	return fmt.Sprintf("total_input_files : %s, "+
-		"total_input_bytes : %s, "+
-		"total_input_cdrs: %s, "+
-		"total_output_files : %s, "+
-		"total_output_cdrs : %s, "+
-		"total_output_bytes : %s\n",
+	return fmt.Sprintf("total_input_files : %d, "+
+		"total_input_bytes : %d, "+
+		"total_input_cdrs: %d, "+
+		"total_output_files : %d, "+
+		"total_output_cdrs : %d, "+
+		"total_output_bytes : %d\n",
 		t.TotalInputFiles,
 		t.TotalInputBytes,
 		t.TotalInputCdrs,
@@ -88,12 +88,12 @@ type TotalGroupedProcessedInOut struct {
 func (t TotalGroupedProcessedInOut) String() string {
 
 	return fmt.Sprintf("time : %s,"+
-		"total_input_files : %s, "+
-		"total_input_cdrs: %s, "+
-		"total_input_bytes : %s, "+
-		"total_output_files : %s, "+
-		"total_output_cdrs : %s, "+
-		"total_output_bytes : %s\n",
+		"total_input_files : %d, "+
+		"total_input_cdrs: %d, "+
+		"total_input_bytes : %d, "+
+		"total_output_files : %d, "+
+		"total_output_cdrs : %d, "+
+		"total_output_bytes : %d\n",
 		t.Time,
 		t.TotalInputFiles,
 		t.TotalInputBytes,
