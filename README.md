@@ -54,6 +54,60 @@ Usage of ./emm-statistics-report:
 
 ## Use Cases
 
-1. Generating statistics for daily
+1. Generate statistics for daily
+
+`./emm-statistics-report.bin --stream "MSS_ALL_INPUT"`
+
+2. Generate daily statistics starting from 1st Jan 2019 till yesterday
+
+`./emm-statistics-report.bin --stream "MSS_ALL_INPUT" --from-date="20190101"`
+
+2. Generate daily statistics starting from 1st Jan 2019 till 1st Feb 2019
+
+`./emm-statistics-report.bin --stream "MSS_ALL_INPUT" --from-date="20190101" --to-date="20190201"`
+
+3. Generate hourly statistics starting from 1st Jan 2019 till yesterady
+
+`./emm-statistics-report.bin --stream "MSS_ALL_INPUT" --from-date="20190101" --group-by="hour"`
+
+3. Generate statistics aggregated by month starting from 1st Jan 2019 till yesterady
+
+`./emm-statistics-report.bin --stream "MSS_ALL_INPUT" --from-date="20190101" --group-by="month"`
 
 ## Sample Configuration File
+
+```
+{
+	"stream_mapping" : [
+		"MSS_ALL_INPUT@RYD1:Server14",
+	],
+  "streams": [
+	{
+      "name": "MSS_ALL_INPUT",
+      "collectors": [
+        "MSS_MAIN"
+      ],
+      "distributors": [
+        "tmp_Z"
+      ]
+    }
+  ],
+  "clusters": [
+    {
+      "default_username": "xxxxxx",
+      "default_password": "xxxxx",
+      "name": "RYD1",
+      "logical_servers": [
+	     {
+          "name": "Server14",
+          "ip": "10.135.3.191",
+          "database": "fm_db_Server14",
+          "port": "5690"
+        }
+      ]
+    }
+  ]
+}
+
+```
+
