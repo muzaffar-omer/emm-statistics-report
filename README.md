@@ -76,38 +76,39 @@ Usage of ./emm-statistics-report:
 
 ## Sample Configuration File
 
-```
-{
-	"stream_mapping" : [
-		"MSS_ALL_INPUT@RYD1:Server14",
-	],
-  "streams": [
-	{
-      "name": "MSS_ALL_INPUT",
-      "collectors": [
-        "MSS_MAIN"
-      ],
-      "distributors": [
-        "tmp_Z"
-      ]
-    }
-  ],
-  "clusters": [
-    {
-      "default_username": "xxxxxx",
-      "default_password": "xxxxx",
-      "name": "RYD1",
-      "logical_servers": [
-	     {
-          "name": "Server14",
-          "ip": "10.135.3.191",
-          "database": "fm_db_Server14",
-          "port": "5690"
-        }
-      ]
-    }
-  ]
-}
+Below is sample `emm-info.json` file which contains description of EMM resources. It must be put on the same directory as the binary file `emm-statistics-report.bin`
 
+```
+{  
+   "stream_mapping":[  
+      "MSS_ALL_INPUT@RYD1:Server14"
+   ],
+   "streams":[  
+      {  
+         "name":"MSS_ALL_INPUT",
+         "collectors":[  
+            "MSS_MAIN"
+         ],
+         "distributors":[  
+            "tmp_Z"
+         ]
+      }
+   ],
+   "clusters":[  
+      {  
+         "default_username":"xxxxxx",
+         "default_password":"xxxxx",
+         "name":"RYD1",
+         "logical_servers":[  
+            {  
+               "name":"Server14",
+               "ip":"10.135.3.191",
+               "database":"fm_db_Server14",
+               "port":"5690"
+            }
+         ]
+      }
+   ]
+}
 ```
 
