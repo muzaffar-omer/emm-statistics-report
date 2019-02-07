@@ -1,5 +1,5 @@
 # EMM Statistics Report Tool
-Tool for extracting statistical reports from Ericsson Multi Mediation platform. It depends on the JSON file which contains the definition of EMM resources including the below:
+Tool for extracting statistical reports from Ericsson Multi Mediation platform. It uses JSON configuration file to describe EMM resources including the below:
 1. Logical Servers:
     * Name
     * Virtual IP (in case of clustered environment), in case of standalone deployments, it will be the same IP as the EMM node IP 
@@ -17,7 +17,7 @@ Tool for extracting statistical reports from Ericsson Multi Mediation platform. 
 
 ## Installation
 
-In order to use the tool, just copy `emm-statistics-report.bin` and `emm-info.json` to the same directory, and update the permission of the binary file `emm-statistics-report.bin` to be able to run the command using the below:
+In order to use the tool, just copy `emm-statistics-report.bin` and `emm-info.json` to the same directory, and update the permission of the binary file `emm-statistics-report.bin` to be able to run below command:
 
 `./emm-statistics-report.bin --help`
 
@@ -54,7 +54,7 @@ Usage of ./emm-statistics-report:
 
 ## Use Cases
 
-1. Generate statistics for daily
+1. Generate daily statistics for the `MSS_ALL_INPUT` stream
 
 `./emm-statistics-report.bin --stream "MSS_ALL_INPUT"`
 
