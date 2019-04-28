@@ -1,6 +1,8 @@
 package main
 
 const (
+	defaultDBTimeFormat = "YYYYMMDDHH24MISS"
+
 	// Template for generation of Input/Output throughput of a logical server
 	throughputQueryTemplate = `SELECT CASE
 		WHEN a.time IS NOT NULL THEN a.time
@@ -65,7 +67,7 @@ const (
 		ON a.time = b.time`
 )
 
-type ThroughputQueryParameters struct {
+type AudittrailLogEntryQueryParameters struct {
 	StartTime    string
 	EndTime      string
 	TimeFormat   string
@@ -77,4 +79,5 @@ type ThroughputQueryParameters struct {
 	OutnodeIds   []string
 }
 
-type TrafficQueryParameters struct{}
+type TrafficQueryParameters struct {
+}

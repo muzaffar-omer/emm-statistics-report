@@ -8,26 +8,32 @@ import (
 
 //var logger = config.Log()
 
+var emmConfig *Config
+
 func init() {
-	fmt.Printf("Calling the init() of the main package !\n")
+	emmConfig = parseEMMConfig()
 }
 
 func main() {
 
-	//app := CreateCliApp()
-	//app.Run(os.Args)
+	os.Args = []string{"emmstats", "h"}
 
-	var param = ThroughputQueryParameters{
-		TimeFormat:   "YYYYMMDDHH24MISS",
-		StartTime:    "20190420140000",
-		EndTime:      "20190420200000",
-		InnodeNames:  []string{"MSC_COL", "4GLTE_COLL"},
-		OutnodeNames: []string{"BI"},
+	app := CreateCliApp()
+	app.Run(os.Args)
+
+	var param = AudittrailLogEntryQueryParameters{
+		TimeFormat: defaultDBTimeFormat,
+		StartTime:  "20190420140000",
+		EndTime:    "20190420200000",
 	}
 
 	var queryTemplate = template.Must(template.New("throughputquery").Parse(throughputQueryTemplate))
 
-	queryTemplate.Execute(os.Stdout, param)
+	err := queryTemplate.Execute(os.Stdout, param)
+
+	if err != nil {
+		fmt.Println(err)
+	}
 
 	// logger.SetFormatter(&logrus.TextFormatter{
 	// 	DisableColors: true,
