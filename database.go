@@ -1,10 +1,9 @@
-package database
+package main
 
 import (
 	"fmt"
 
-	config "github.com/muzaffar-omer/emm-statistics-report/configuration"
-	log "github.com/sirupsen/logrus"
+	"github.com/sirupsen/logrus"
 
 	"github.com/jmoiron/sqlx"
 	_ "github.com/lib/pq"
@@ -13,13 +12,13 @@ import (
 var sessionsPool []Session
 
 type Session struct {
-	logicalServer *config.LogicalServer
+	logicalServer *LogicalServer
 	Db            *sqlx.DB
 }
 
 // Checks whether there is already an existing working session
 // If it finds one, returns pointer to the session, otherwise, returns nil
-func isSessionExists(logicalServer *config.LogicalServer) *Session {
+func isSessionExists(logicalServer *LogicalServer) *Session {
 
 	for _, existingSession := range sessionsPool {
 		if existingSession.logicalServer.Equals(logicalServer) {
@@ -32,7 +31,7 @@ func isSessionExists(logicalServer *config.LogicalServer) *Session {
 
 // Opens a session to a logical server database and adds the
 // session to the pool
-func CreateSession(ls *config.LogicalServer) *Session {
+func CreateSession(ls *LogicalServer) *Session {
 
 	var newSession *Session
 
@@ -40,15 +39,15 @@ func CreateSession(ls *config.LogicalServer) *Session {
 		return newSession
 	}
 
-	connStr := fmt.Sprintf("user=%s dbname=%s password=%s port=%s host=%s sslmode=disable", ls.Username, ls.Database, ls.Password, ls.Port, ls.Ip)
+	connStr := fmt.Sprintf("user=%s dbname=%s password=%s port=%s host=%s sslmode=disable", ls.Username, ls.Database, ls.Password, ls.Port, ls.IP)
 
 	db, err := sqlx.Open("postgres", connStr)
 
 	if err != nil {
-		log.WithFields(log.Fields{
+		logger.WithFields(logrus.Fields{
 			"logical_server": ls.Name,
 			"database":       ls.Database,
-			"ip":             ls.Ip,
+			"ip":             ls.IP,
 			"port":           ls.Port,
 			"error":          err,
 		}).Error("Opening session")
@@ -62,10 +61,10 @@ func CreateSession(ls *config.LogicalServer) *Session {
 	err = db.Ping()
 
 	if err != nil {
-		log.WithFields(log.Fields{
+		logger.WithFields(logrus.Fields{
 			"logical_server": ls.Name,
 			"database":       ls.Database,
-			"ip":             ls.Ip,
+			"ip":             ls.IP,
 			"port":           ls.Port,
 			"error":          err,
 		}).Error("Ping database")
@@ -76,4 +75,28 @@ func CreateSession(ls *config.LogicalServer) *Session {
 	sessionsPool = append(sessionsPool, *newSession)
 
 	return newSession
+}
+
+func executeQuery(ls *LogicalServer, query string) *sqlx.Rows {
+
+	var rows *sqlx.Rows
+
+	if session := CreateSession(ls); session != nil {
+
+		rows, err := session.Db.Queryx(query)
+
+		if err != nil {
+			logger.WithFields(logrus.Fields{
+				"query": fmt.Sprintf(query),
+				"error": err,
+			}).Error("Querying all rows")
+		}
+
+		return rows
+
+	} else {
+		fmt.Println("Session is nil")
+	}
+
+	return rows
 }

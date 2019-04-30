@@ -1,5 +1,11 @@
 package main
 
+import (
+	"bytes"
+	"fmt"
+	"text/template"
+)
+
 const (
 	defaultDBTimeFormat = "YYYYMMDDHH24MISS"
 
@@ -80,4 +86,17 @@ type AudittrailLogEntryQueryParameters struct {
 }
 
 type TrafficQueryParameters struct {
+}
+
+func parseTemplate(templateName string, queryTemplate string, paramStruct interface{}) string {
+	var actualQuery bytes.Buffer
+	var parsedTemplate = template.Must(template.New(templateName).Parse(queryTemplate))
+
+	err := parsedTemplate.Execute(&actualQuery, paramStruct)
+
+	if err != nil {
+		fmt.Println(err)
+	}
+
+	return actualQuery.String()
 }

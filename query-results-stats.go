@@ -1,9 +1,8 @@
-package stats
+package main
 
 import (
 	"os"
 
-	"github.com/muzaffar-omer/emm-statistics-report/database"
 	"github.com/olekukonko/tablewriter"
 )
 
@@ -77,7 +76,7 @@ func CreateStatisticsTable(statisticalRecords []Statistical) *tablewriter.Table 
 			statsRow[0] = "Sum"
 
 			for colNum := 1; colNum < len(header); colNum += 1 {
-				statsRow[colNum] = database.GetFormattedNumber(sum[header[colNum]])
+				statsRow[colNum] = GetFormattedNumber(sum[header[colNum]])
 			}
 
 			table.Append(statsRow)
@@ -86,7 +85,7 @@ func CreateStatisticsTable(statisticalRecords []Statistical) *tablewriter.Table 
 			statsRow[0] = "Avg"
 
 			for colNum := 1; colNum < len(header); colNum += 1 {
-				statsRow[colNum] = database.GetFormattedNumber(avg[header[colNum]])
+				statsRow[colNum] = GetFormattedNumber(avg[header[colNum]])
 			}
 
 			table.Append(statsRow)
@@ -95,7 +94,7 @@ func CreateStatisticsTable(statisticalRecords []Statistical) *tablewriter.Table 
 			statsRow[0] = "Min"
 
 			for colNum := 1; colNum < len(header); colNum += 1 {
-				statsRow[colNum] = database.GetFormattedNumber(min[header[colNum]])
+				statsRow[colNum] = GetFormattedNumber(min[header[colNum]])
 			}
 
 			table.Append(statsRow)
@@ -104,7 +103,7 @@ func CreateStatisticsTable(statisticalRecords []Statistical) *tablewriter.Table 
 			statsRow[0] = "Max"
 
 			for colNum := 1; colNum < len(header); colNum += 1 {
-				statsRow[colNum] = database.GetFormattedNumber(max[header[colNum]])
+				statsRow[colNum] = GetFormattedNumber(max[header[colNum]])
 			}
 
 			table.Append(statsRow)

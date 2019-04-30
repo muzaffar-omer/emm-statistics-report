@@ -1,39 +1,25 @@
 package main
 
 import (
-	"fmt"
+	"github.com/sirupsen/logrus"
 	"os"
-	"text/template"
 )
 
-//var logger = config.Log()
-
-var emmConfig *Config
+var logger = logrus.New()
 
 func init() {
+	logger.SetLevel(logrus.InfoLevel)
+
 	emmConfig = parseEMMConfig()
-}
 
-func main() {
-
-	os.Args = []string{"emmstats", "h"}
+	os.Args = []string{"emmstats", "--cluster=dev", "--lserver=Server11", "throughput"}
+	//os.Args = []string{"emmstats", "h"}
 
 	app := CreateCliApp()
 	app.Run(os.Args)
+}
 
-	var param = AudittrailLogEntryQueryParameters{
-		TimeFormat: defaultDBTimeFormat,
-		StartTime:  "20190420140000",
-		EndTime:    "20190420200000",
-	}
-
-	var queryTemplate = template.Must(template.New("throughputquery").Parse(throughputQueryTemplate))
-
-	err := queryTemplate.Execute(os.Stdout, param)
-
-	if err != nil {
-		fmt.Println(err)
-	}
+func main() {
 
 	// logger.SetFormatter(&logrus.TextFormatter{
 	// 	DisableColors: true,

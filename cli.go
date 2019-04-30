@@ -37,6 +37,7 @@ var throughputCommand = &cli.Command{
 	Name:    "throughput",
 	Aliases: []string{"t"},
 	Usage:   "Input/Output Files and CDRs statistics, cluster name is required",
+	Action:  throughput,
 }
 
 // Command to generate CPU and Memory statistics as below:
@@ -96,6 +97,17 @@ var endTimeGFlag = &cli.StringFlag{
 	Value: currentTime(),
 }
 
+var groupByGFlag = &cli.StringFlag{
+	Name:  "group-by, gb",
+	Usage: "Time interval for grouping of the result, possible values are minute, hour, day, month",
+	Value: "day",
+}
+
+var streamGFlag = &cli.StringFlag{
+	Name:  "stream, s",
+	Usage: "Name of the stream defined in YAML configuration file",
+}
+
 //######################### Adhoc Database Global Flags ##################################
 var lsDatabaseGFlag = &cli.StringFlag{
 	Name:  "ls-database, ldb",
@@ -128,6 +140,7 @@ func CreateCliApp() *cli.App {
 		Flags: []cli.Flag{
 			clusterGFlag,
 			logicalServerGFlag,
+			streamGFlag,
 			outputFormatGFlag,
 			startTimeGFlag,
 			endTimeGFlag,
@@ -135,6 +148,7 @@ func CreateCliApp() *cli.App {
 			perfDatabaseGFlag,
 			dbIPGFlag,
 			dbPortGFlag,
+			groupByGFlag,
 		},
 
 		Commands: []*cli.Command{
@@ -156,4 +170,16 @@ type CliError struct{}
 
 func (e CliError) Error() string {
 	return ""
+}
+
+func validateCliArgs(context *cli.Context) error {
+
+	if len(context.String("ls-database")) > 0 ||
+		len(context.String("pf-database")) > 0 ||
+		len(context.String("db-ip")) > 0 ||
+		len(context.String("db-port")) > 0 {
+
+	}
+
+	return nil
 }
