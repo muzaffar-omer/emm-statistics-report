@@ -1,7 +1,6 @@
 package main
 
 import (
-	"fmt"
 	"github.com/sirupsen/logrus"
 	"gopkg.in/urfave/cli.v2"
 )
@@ -44,7 +43,6 @@ func throughput(context *cli.Context) error {
 		stream := findStream(streamArg)
 
 		if stream.LogicalServer != nil {
-			// logicalServer := findLogicalServer(stream.LogicalServer.Name, stream.LogicalServer.Cluster)
 
 		} else {
 			logger.WithFields(logrus.Fields{
@@ -63,20 +61,7 @@ func throughput(context *cli.Context) error {
 		rows := executeQuery(logicalServer, query)
 
 		if rows != nil {
-			var totalGroupedProcessedInOut TotalGroupedProcessedInOut
-
-			for rows.Next() {
-				totalGroupedProcessedInOut = TotalGroupedProcessedInOut{}
-				rows.StructScan(&totalGroupedProcessedInOut)
-
-				fmt.Printf("%s,%d,%d,%d\n", totalGroupedProcessedInOut.Time,
-					totalGroupedProcessedInOut.TotalInputBytes,
-					totalGroupedProcessedInOut.TotalInputCdrs,
-					totalGroupedProcessedInOut.TotalInputFiles)
-			}
-
-		} else {
-			fmt.Println("Rows is nil")
+			printResultTable(rows)
 		}
 
 	} else {

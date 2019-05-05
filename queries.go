@@ -15,15 +15,15 @@ const (
 		WHEN b.time IS NOT NULL THEN b.time
 		ELSE NULL
 		END as time,
-			COALESCE(a.total_input_files, 0) AS total_input_files,
-			COALESCE(b.total_input_cdrs, 0) AS total_input_cdrs,
-			COALESCE(a.total_input_bytes, 0) AS total_input_bytes,
-			COALESCE(b.total_output_files, 0) AS total_output_files,
-			COALESCE(b.total_output_cdrs, 0) AS total_output_cdrs,
-			COALESCE(b.total_output_bytes, 0) AS total_output_bytes
+			COALESCE(a.input_files, 0) AS input_files,
+			COALESCE(b.input_cdrs, 0) AS input_cdrs,
+			COALESCE(a.input_bytes, 0) AS input_bytes,
+			COALESCE(b.output_files, 0) AS output_files,
+			COALESCE(b.output_cdrs, 0) AS output_cdrs,
+			COALESCE(b.output_bytes, 0) AS output_bytes
 		FROM   (SELECT To_char(intime, '{{.TimeFormat}}') AS time,
-			Count (*)                     AS total_input_files,
-			Sum(bytes)                    AS total_input_bytes
+			Count (*)                     AS input_files,
+			Sum(bytes)::int               AS input_bytes
 		FROM   audittraillogentry
 		WHERE  
 		to_char(intime, '{{.TimeFormat}}') >= '{{.StartTime}}'
@@ -36,13 +36,13 @@ const (
 		WHEN d.time IS NOT NULL THEN d.time
 		ELSE NULL
 		END AS time,
-			c.total_input_cdrs,
-			d.total_output_files,
-			d.total_output_cdrs,
-			d.total_output_bytes
+			c.input_cdrs,
+			d.output_files,
+			d.output_cdrs,
+			d.output_bytes
 		FROM   (SELECT To_char(intime, '{{.TimeFormat}}') AS time,
-			COALESCE(Sum (cdrs), 0)       AS
-		total_input_cdrs
+			COALESCE(Sum (cdrs)::int, 0)       AS
+		input_cdrs
 		FROM   audittraillogentry
 		WHERE  
 		to_char(intime, '{{.TimeFormat}}') >= '{{.StartTime}}'
@@ -55,13 +55,13 @@ const (
 		AS time,
 			Count(*)
 		AS
-		total_output_files,
-			Sum(cdrs)
+		output_files,
+			Sum(cdrs)::int
 		AS
-		total_output_cdrs,
-			Sum(bytes)
+		output_cdrs,
+			Sum(bytes)::int
 		AS
-		total_output_bytes
+		output_bytes
 		FROM   audittraillogentry
 		WHERE  
 		to_char(outtime, '{{.TimeFormat}}') >= '{{.StartTime}}'

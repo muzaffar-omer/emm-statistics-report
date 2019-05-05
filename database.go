@@ -2,8 +2,16 @@ package main
 
 import (
 	"fmt"
-
+	"github.com/montanaflynn/stats"
+	"github.com/olekukonko/tablewriter"
 	"github.com/sirupsen/logrus"
+	"os"
+	"reflect"
+	"strconv"
+
+	//"strconv"
+
+	//"reflect"
 
 	"github.com/jmoiron/sqlx"
 	_ "github.com/lib/pq"
@@ -99,4 +107,166 @@ func executeQuery(ls *LogicalServer, query string) *sqlx.Rows {
 	}
 
 	return rows
+}
+
+func printResultTable(rows *sqlx.Rows) {
+
+	var table = tablewriter.NewWriter(os.Stdout)
+	var statsMap = make(map[string][]float64)
+
+	var row map[string]interface{}
+	var rowFieldsStringVals []string
+
+	columns, _ := rows.Columns()
+
+	table.SetHeader(columns)
+
+	for rows.Next() {
+		row = make(map[string]interface{})
+		rowFieldsStringVals = []string{}
+
+		rows.MapScan(row)
+
+		for i := range columns {
+			rowFieldsStringVals = append(rowFieldsStringVals, rowFieldToString(row[columns[i]]))
+
+			if floatFieldValue, err := rowFieldToFloat(row[columns[i]]); err == nil {
+				statsMap[columns[i]] = append(statsMap[columns[i]], floatFieldValue)
+			}
+		}
+
+		table.Append(rowFieldsStringVals)
+	}
+
+	table.Render()
+
+	// Average
+	fmt.Printf("\n\nAverage\n")
+	table = createAverageTable(columns, statsMap)
+	table.Render()
+
+	// Max
+	fmt.Printf("\n\nMax\n")
+	table = createMaxTable(columns, statsMap)
+	table.Render()
+
+	// Min
+	fmt.Printf("\n\nMin\n")
+	table = createMinTable(columns, statsMap)
+	table.Render()
+
+	// Sum
+	fmt.Printf("\n\nSum\n")
+	table = createSumTable(columns, statsMap)
+	table.Render()
+}
+
+func createAverageTable(columns []string, statsMap map[string][]float64) *tablewriter.Table {
+	var table = tablewriter.NewWriter(os.Stdout)
+	var statsFields = []string{}
+
+	table.SetHeader(columns)
+
+	for i := range columns {
+		if avg, err := stats.Mean(statsMap[columns[i]]); err == nil {
+			statsFields = append(statsFields, strconv.FormatFloat(avg, 'f', -1, 64))
+		} else {
+			statsFields = append(statsFields, "")
+		}
+	}
+
+	table.Append(statsFields)
+
+	return table
+}
+
+func createMaxTable(columns []string,  statsMap map[string][]float64) *tablewriter.Table {
+	var table = tablewriter.NewWriter(os.Stdout)
+	var statsFields = []string{}
+
+	table.SetHeader(columns)
+
+	for i := range columns {
+		if avg, err := stats.Max(statsMap[columns[i]]); err == nil {
+			statsFields = append(statsFields, strconv.FormatFloat(avg, 'f', -1, 64))
+		} else {
+			statsFields = append(statsFields, "")
+		}
+	}
+
+	table.Append(statsFields)
+
+	return table
+}
+
+func createMinTable(columns []string,  statsMap map[string][]float64) *tablewriter.Table {
+	var table = tablewriter.NewWriter(os.Stdout)
+	var statsFields = []string{}
+
+	table.SetHeader(columns)
+
+	for i := range columns {
+		if avg, err := stats.Min(statsMap[columns[i]]); err == nil {
+			statsFields = append(statsFields, strconv.FormatFloat(avg, 'f', -1, 64))
+		} else {
+			statsFields = append(statsFields, "")
+		}
+	}
+
+	table.Append(statsFields)
+
+	return table
+}
+
+func createSumTable(columns []string,  statsMap map[string][]float64) *tablewriter.Table {
+	var table = tablewriter.NewWriter(os.Stdout)
+	var statsFields = []string{}
+
+	table.SetHeader(columns)
+
+	for i := range columns {
+		if avg, err := stats.Sum(statsMap[columns[i]]); err == nil {
+			statsFields = append(statsFields, strconv.FormatFloat(avg, 'f', -1, 64))
+		} else {
+			statsFields = append(statsFields, "")
+		}
+	}
+
+	table.Append(statsFields)
+
+	return table
+}
+
+func rowFieldToString(field interface{}) string {
+	var v = reflect.ValueOf(field)
+	var t = reflect.TypeOf(field)
+	var fieldStringValue string
+
+	switch t.Kind() {
+	case reflect.Int64:
+		fieldStringValue = strconv.FormatInt(v.Int(), 10)
+	case reflect.Uint8:
+		fieldStringValue = strconv.FormatInt(v.Int(), 10)
+	case reflect.String:
+		fieldStringValue = v.String()
+	}
+
+	return fieldStringValue
+}
+
+func rowFieldToFloat(field interface{}) (float64, error) {
+	var v = reflect.ValueOf(field)
+	var t = reflect.TypeOf(field)
+	var fieldFloatValue float64
+
+	switch t.Kind() {
+	case reflect.Int64:
+		fieldFloatValue = float64(v.Int())
+	case reflect.Uint8:
+		fieldFloatValue = float64(v.Int())
+	default:
+		return 0, fmt.Errorf("Not numeric field")
+	}
+
+	return fieldFloatValue, nil
 }

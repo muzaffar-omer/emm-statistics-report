@@ -1,0 +1,14 @@
+version: '3.2'
+services:
+  db:
+    image: emm-stats-db:fm_db_Server11
+    container_name: emm-stats-db
+    ports:
+    - 5432:5432
+    environment:
+      POSTGRES_PASSWORD: mediation
+      POSTGRES_USER: mmsuper
+    volumes:
+    - type: bind
+      source: /Users/muzaffar/Downloads/Temp
+      target: /var/tmp/files
