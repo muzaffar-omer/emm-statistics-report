@@ -50,12 +50,25 @@ func throughput(context *cli.Context) error {
 			}).Fatalf("%s stream is not assigned to any logical server", stream.Name)
 		}
 	} else if len(logicalServerArg) > 0 && len(clusterArg) > 0 {
+		// Generate throughput report for a complete logical server audittraillogentry
 		logicalServer := findLogicalServer(logicalServerArg, clusterArg)
+
+		groupByDateFormat := context.String("group-by")
+
+		switch groupByDateFormat {
+			case "month" : groupByDateFormat = month; break
+			case "day" : groupByDateFormat = day; break
+			case "hour" : groupByDateFormat = hour; break
+			case "minute" : groupByDateFormat = minute; break
+			default: groupByDateFormat = day
+		}
+
 		params := AudittrailLogEntryQueryParameters{
-			TimeFormat: defaultDBTimeFormat,
+			TimeFormat: groupByDateFormat,
 			StartTime:  startTimeArg,
 			EndTime:    endTimeArg,
 		}
+
 		query := parseTemplate("throughput", throughputQueryTemplate, params)
 
 		rows := executeQuery(logicalServer, query)

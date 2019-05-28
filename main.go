@@ -12,7 +12,7 @@ func init() {
 
 	emmConfig = parseEMMConfig()
 
-	os.Args = []string{"emmstats", "--cluster=dev", "--lserver=Server11", "throughput"}
+	os.Args = []string{"emmstats", "--cluster=dev", "--lserver=Server11", "--group-by=month", "throughput"}
 	//os.Args = []string{"emmstats", "h"}
 
 	app := CreateCliApp()

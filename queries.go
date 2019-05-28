@@ -7,7 +7,11 @@ import (
 )
 
 const (
-	defaultDBTimeFormat = "YYYYMMDDHH24MISS"
+	defaultDBTimeFormat = "YYYYMMDDHH24"
+	day = "YYYYMMDD"
+	hour = "YYYYMMDDHH24"
+	minute = "YYYYMMDDHH24MI"
+	month = "YYYYMM"
 
 	// Template for generation of Input/Output throughput of a logical server
 	throughputQueryTemplate = `SELECT CASE
@@ -23,7 +27,7 @@ const (
 			COALESCE(b.output_bytes, 0) AS output_bytes
 		FROM   (SELECT To_char(intime, '{{.TimeFormat}}') AS time,
 			Count (*)                     AS input_files,
-			Sum(bytes)::int               AS input_bytes
+			Sum(bytes)::bigint               AS input_bytes
 		FROM   audittraillogentry
 		WHERE  
 		to_char(intime, '{{.TimeFormat}}') >= '{{.StartTime}}'
@@ -41,7 +45,7 @@ const (
 			d.output_cdrs,
 			d.output_bytes
 		FROM   (SELECT To_char(intime, '{{.TimeFormat}}') AS time,
-			COALESCE(Sum (cdrs)::int, 0)       AS
+			COALESCE(Sum (cdrs)::bigint, 0)       AS
 		input_cdrs
 		FROM   audittraillogentry
 		WHERE  
@@ -56,10 +60,10 @@ const (
 			Count(*)
 		AS
 		output_files,
-			Sum(cdrs)::int
+			Sum(cdrs)::bigint
 		AS
 		output_cdrs,
-			Sum(bytes)::int
+			Sum(bytes)::bigint
 		AS
 		output_bytes
 		FROM   audittraillogentry
