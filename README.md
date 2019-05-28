@@ -17,98 +17,95 @@ Tool for extracting statistical reports from Ericsson Multi Mediation platform. 
 
 ## Installation
 
-In order to use the tool, just copy `emm-statistics-report.bin` and `emm-info.json` to the same directory, and update the permission of the binary file `emm-statistics-report.bin` to be able to run below command:
+In order to use the tool, just copy `emmstats` and `emm-config.yaml` to the same directory, and update the permission of the binary file `emmstats` to be able to run below command:
 
-`./emm-statistics-report.bin --help`
+`./emmstats --help`
 
 This will generate the below output:
 
 ```
-Usage of ./emm-statistics-report:
-  -from-date string
-    	Specifies the start date for generation of the report in the format YYYYMMDD (default "19700101")
-  -group-by string
-    	Specifies the intervals for grouping of the result [minute, hour, day, month], default value is 'day' (default "day")
-  -ip string
-    	Postgresql DB instance IP address (default "localhost")
-  -log-level string
-    	Sets the logging level, [Debug, Info, Warn, Error, Fatal] (default "Error")
-  -ls string
-    	Logical server name in format Server1@RYD1
-  -output-format string
-    	Specifies the format of the result [table, csv] (default "table")
-  -password string
-    	DB user password (default "thule")
-  -port string
-    	DB port (default "5432")
-  -query-type int
-    	Specifies the required type of query (operation), below are the possible values:
-    	1 - Stream processed input/output grouped by minute, hour, day, or month, it requires the group-by parameter to be specified (default group-by value is day)2 - Logical server processed input/output grouped by minute, hour, day, or month, it requires the group-by parameter to be specified (default group-by value is day), requires setting --ls parameter (default 1)
-  -stream string
-    	Stream name defined in the EMM configuration file
-  -to-date string
-    	Specifies the end date for generation of the report in the format YYYYMMDD (default "20190205")
-  -username string
-    	DB user name (default "mmsuper")
+NAME:
+   emmstats - Tool to generate EMM throughput and performance statistic reports.
+
+USAGE:
+   emmstats [global options] command [command options] [arguments...]
+
+VERSION:
+   0.0.0
+
+COMMANDS:
+     cdrs, c         Input/Output CDRs statistics, cluster name is required
+     files, f        Input/Output Files statistics, cluster name is required
+     throughput, t   Input/Output Files and CDRs statistics, cluster name is required
+     performance, p  CPU and Memory statistics, cluster name is required
+     help, h         Shows a list of commands or help for one command
+
+GLOBAL OPTIONS:
+   --cluster value, --cl value       Name of EMM cluster which contains the logical server
+   --lserver. ls value               Name of EMM logical server
+   --format value, --fmt value       Output format of the report, valid values (table, csv) (default: "table")
+   --start-time value, --sd value    Start time of the report in the format YYMMDDHH24MISS (default: "20190101000000")
+   --end-time value, --ed value      End time of the report in the format YYMMDDHH24MISS (default: "20190528162228")
+   --ls-database value, --ldb value  Name of adhoc logical server database to specify in CLI without configuring it in EMM config file
+   --pf-database value, --pdb value  Name of adhoc performance database to specify in CLI without configuring it in EMM config file
+   --db-ip value, --ip value         IP of the adhoc database
+   --db-port value, -p value         Port of the adhoc database
+   --help, -h                        show help
+   --version, -v                     print the version
 ```
 
-## Use Cases
+## Sample Commands
 
-1. Generate daily statistics for the `MSS_ALL_INPUT` stream
-
-`./emm-statistics-report.bin --stream "MSS_ALL_INPUT"`
-
-2. Generate daily statistics starting from 1st Jan 2019 till yesterday
-
-`./emm-statistics-report.bin --stream "MSS_ALL_INPUT" --from-date="20190101"`
-
-2. Generate daily statistics starting from 1st Jan 2019 till 1st Feb 2019
-
-`./emm-statistics-report.bin --stream "MSS_ALL_INPUT" --from-date="20190101" --to-date="20190201"`
-
-3. Generate hourly statistics starting from 1st Jan 2019 till yesterady
-
-`./emm-statistics-report.bin --stream "MSS_ALL_INPUT" --from-date="20190101" --group-by="hour"`
-
-3. Generate statistics aggregated by month starting from 1st Jan 2019 till yesterady
-
-`./emm-statistics-report.bin --stream "MSS_ALL_INPUT" --from-date="20190101" --group-by="month"`
 
 ## Sample Configuration File
 
 Below is sample `emm-info.json` file which contains description of EMM resources. It must be put on the same directory as the binary file `emm-statistics-report.bin`
 
 ```
-{  
-   "stream_mapping":[  
-      "MSS_ALL_INPUT@RYD1:Server14"
-   ],
-   "streams":[  
-      {  
-         "name":"MSS_ALL_INPUT",
-         "collectors":[  
-            "MSS_MAIN"
-         ],
-         "distributors":[  
-            "tmp_Z"
-         ]
-      }
-   ],
-   "clusters":[  
-      {  
-         "default_username":"xxxxxx",
-         "default_password":"xxxxx",
-         "name":"RYD1",
-         "logical_servers":[  
-            {  
-               "name":"Server14",
-               "ip":"10.135.3.191",
-               "database":"fm_db_Server14",
-               "port":"5690"
-            }
-         ]
-      }
-   ]
-}
+clusters:
+  - name: Test # Cluster Name
+    username: mmsuper # Default username used to access logical servers databases
+    password: mediation
+    logical-servers:
+      - name: Server5
+        ip: 10.135.5.81
+        username: mmsuper
+        passwod: thule
+        port: 5432
+  - name: ryd2
+    username: mmsuper
+    password: mediation
+    logical-servers:
+      - name: Server1
+        ip: 10.135.3.125
+  - name: dev
+    username: mmsuper
+    password: mediation
+    logical-servers:
+      - name: Server11
+        ip: localhost
+        port: 5432
+        username: mmsuper
+        password: mediation
+        database: fm_db_Server11
+
+configurations:
+  - name: UAT_Test
+    coll-names: ["INPUT", "Output"]
+    dist-names: ["BI", "RA"]
+    assigned-logical-server:
+      name: Server1
+      cluster: ryd2
+  - name: 4GLTE_INPUT_CDRs
+    coll-names: ["to4G_LTE_in_RD", "to4G_LTE_in_RD", "to4G_LTE_in_RD", "to4G_LTE_in_RD"]
+    assigned-logical-server:
+      name: Server11
+      cluster: dev
+  - name: HWPGW_INPUT_CDRs
+      coll-names: ["toHW_PGW_in_RD", "toHW_PGW_in_JD", "toHW_PGW_in_JE", "toHW_PGW_in_JE"]
+      coll-ids: ["14025"]
+      assigned-logical-server:
+        name: Server11
+        cluster: dev
 ```
 
