@@ -69,7 +69,7 @@ func throughput(context *cli.Context) error {
 			EndTime:    endTimeArg,
 		}
 
-		query := parseTemplate("throughput", throughputQueryTemplate, params)
+		query := parseTemplate("throughput", lsThroughputQueryTemplate, params)
 
 		rows := executeQuery(logicalServer, query)
 

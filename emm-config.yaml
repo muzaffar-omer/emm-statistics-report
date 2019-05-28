@@ -27,12 +27,19 @@ clusters:
 
 configurations:
   - name: UAT_Test
-    collectors: ["INPUT", "Output"]
-    distributors: ["BI", "RA"]
+    coll-names: ["INPUT", "Output"]
+    dist-names: ["BI", "RA"]
     assigned-logical-server:
       name: Server1
       cluster: ryd2
-  - name: 4GLTE
+  - name: 4GLTE_INPUT_CDRs
+    coll-names: ["to4G_LTE_in_RD", "to4G_LTE_in_RD", "to4G_LTE_in_RD", "to4G_LTE_in_RD"]
     assigned-logical-server:
       name: Server11
       cluster: dev
+  - name: HWPGW_INPUT_CDRs
+      coll-names: ["toHW_PGW_in_RD", "toHW_PGW_in_JD", "toHW_PGW_in_JE", "toHW_PGW_in_JE"]
+      coll-ids: ["14025"]
+      assigned-logical-server:
+        name: Server11
+        cluster: dev

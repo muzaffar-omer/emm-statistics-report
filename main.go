@@ -7,7 +7,7 @@ import (
 
 var logger = logrus.New()
 
-func init() {
+func main() {
 	logger.SetLevel(logrus.InfoLevel)
 
 	emmConfig = parseEMMConfig()
@@ -17,9 +17,6 @@ func init() {
 
 	app := CreateCliApp()
 	app.Run(os.Args)
-}
-
-func main() {
 
 	// logger.SetFormatter(&logrus.TextFormatter{
 	// 	DisableColors: true,

@@ -24,10 +24,12 @@ type Config struct {
 // specifies the logical server where the stream is running. Name of stream is independent from the name of the business
 // logic used in production EMM. It is just a name
 type Stream struct {
-	Name          string                 `yaml:"name"`
-	Collectors    []string               `yaml:"collectors"`
-	Distributors  []string               `yaml:"distributors"`
-	LogicalServer *AssignedLogicalServer `yaml:"assigned-logical-server"`
+	Name             string                 `yaml:"name"`
+	CollectorNames   []string               `yaml:"coll-names"`
+	DistributorNames []string               `yaml:"dist-names"`
+	CollectorIds     []string               `yaml:"coll-ids"`
+	DistributorIds   []string               `yaml:"dist-ids"`
+	LogicalServer    *AssignedLogicalServer `yaml:"assigned-logical-server"`
 }
 
 // Cluster is the top-level modules which contains the definition of the logical servers
