@@ -7,7 +7,10 @@ import (
 	"time"
 )
 
-const timeFlagFormat = "20060102150405"
+const (
+	timeFlagFormat = "20060102150405"
+	errorExitCode  = -1
+)
 
 //######################### Global Commands ##################################
 // Command to generate the CDRs statistics, it could generate the below:
@@ -18,8 +21,7 @@ var cdrsCommand = &cli.Command{
 	Name:        "cdrs",
 	Aliases:     []string{"c"},
 	Description: "Input/Output CDRs statistics, cluster name is required",
-	Action: cdrs,
-	Before: validateCdrs,
+	Action:      cdrs,
 }
 
 // Command to generate the Files statistics, it could generate the below:
@@ -30,7 +32,6 @@ var filesCommand = &cli.Command{
 	Name:    "files",
 	Aliases: []string{"f"},
 	Usage:   "Input/Output Files statistics, cluster name is required",
-	Before: validateFiles,
 }
 
 // Command to generate the Throughput (Files and CDRs) statistics, it could
@@ -43,7 +44,7 @@ var throughputCommand = &cli.Command{
 	Aliases: []string{"t"},
 	Usage:   "Input/Output Files and CDRs statistics, cluster name is required",
 	Action:  throughput,
-	Before: validateThroughput,
+	Before: validateThroughputOptions,
 }
 
 // Command to generate CPU and Memory statistics as below:
@@ -56,7 +57,6 @@ var performanceCommand = &cli.Command{
 		cpuCommand,
 		memCommand,
 	},
-	Before: validatePerformance,
 }
 
 //######################### Performance Subcommands ##################################
@@ -116,7 +116,7 @@ var streamGFlag = &cli.StringFlag{
 }
 
 var verboseGFlag = &cli.BoolFlag{
-	Name: "verbose, v",
+	Name:  "verbose, v",
 	Usage: "Verbose mode (set log level to debug)",
 	Value: false,
 }

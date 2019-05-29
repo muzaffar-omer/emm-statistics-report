@@ -24,32 +24,8 @@ func throughput(context *cli.Context) error {
 	logicalServerArg := context.String("lserver")
 	clusterArg := context.String("cluster")
 
-	verbose := context.Bool("verbose")
-
-	if verbose {
-		logger.SetLevel(logrus.DebugLevel)
-	}
-
 	// Stream name is required to generate throughput for specific stream
 	streamArg := context.String("stream")
-
-	// Stream and logical server information are exclusive, it is not possible to specify both, either specify
-	// logical server details (i.e. logical server, and cluster name). Or specify stream name only
-	if (len(logicalServerArg) > 0 || len(clusterArg) > 0) && len(streamArg) > 0 {
-		logger.WithFields(logrus.Fields{
-			"command": "throughput",
-		}).Fatalln("Stream and Logical Server flags cannot be specified at the same time in CLI global options" +
-			". Either specify a stream, or specify logical server information (i.e. logical server name, and cluster " +
-			"name")
-	} else if len(logicalServerArg) > 0 && len(clusterArg) == 0 {
-		logger.WithFields(logrus.Fields{
-			"command": "throughput",
-		}).Fatalln("Cluster name is missing")
-	} else if len(logicalServerArg) == 0 && len(clusterArg) > 0 {
-		logger.WithFields(logrus.Fields{
-			"command": "throughput",
-		}).Fatalln("Logical server name is missing")
-	}
 
 	// Generate throughput report for a stream
 	if len(streamArg) > 0 {
@@ -135,11 +111,7 @@ func cdrs(context *cli.Context) error {
 	return nil
 }
 
-func validateThroughput(context *cli.Context) error {
-
-	// Logical server name, and cluster are required to generate throughput for specific logical server
-	logicalServerArg := context.String("lserver")
-	clusterArg := context.String("cluster")
+func initializeAndValidateGFlags(context *cli.Context) error {
 
 	verbose := context.Bool("verbose")
 
@@ -147,31 +119,6 @@ func validateThroughput(context *cli.Context) error {
 		logger.SetLevel(logrus.DebugLevel)
 	}
 
-	// Stream name is required to generate throughput for specific stream
-	streamArg := context.String("stream")
-
-	// Stream and logical server information are exclusive, it is not possible to specify both, either specify
-	// logical server details (i.e. logical server, and cluster name). Or specify stream name only
-	if (len(logicalServerArg) > 0 || len(clusterArg) > 0) && len(streamArg) > 0 {
-		logger.WithFields(logrus.Fields{
-			"command": "throughput",
-		}).Fatalln("Stream and Logical Server flags cannot be specified at the same time in CLI global options" +
-			". Either specify a stream, or specify logical server information (i.e. logical server name, and cluster " +
-			"name")
-	} else if len(logicalServerArg) > 0 && len(clusterArg) == 0 {
-		logger.WithFields(logrus.Fields{
-			"command": "throughput",
-		}).Fatalln("Cluster name is missing")
-	} else if len(logicalServerArg) == 0 && len(clusterArg) > 0 {
-		logger.WithFields(logrus.Fields{
-			"command": "throughput",
-		}).Fatalln("Logical server name is missing")
-	}
-
-	return nil
-}
-
-func initializeAndValidateGFlags(context *cli.Context) error {
 	lsDbname := context.String("ls-dbname")
 	pfDbname := context.String("pf-dbname")
 
@@ -185,24 +132,32 @@ func initializeAndValidateGFlags(context *cli.Context) error {
 	// Make sure Adhoc options are not combined with configuration file based options
 	if len(lsDbname) > 0 || len(pfDbname) > 0 {
 		if len(lserver) > 0 {
-			return cli.Exit("Cannot combine --lserver option with adhoc query options", -1)
+			return cli.Exit("Cannot combine --lserver option with adhoc query options", errorExitCode)
 		}
 
 		if len(cluster) > 0 {
-			return cli.Exit("Cannot combine --cluster option with adhoc query options", -1)
+			return cli.Exit("Cannot combine --cluster option with adhoc query options", errorExitCode)
 		}
 
 		if len(stream) > 0 {
-			return cli.Exit("Cannot combine --stream option with adhoc query options", -1)
+			return cli.Exit("Cannot combine --stream option with adhoc query options", errorExitCode)
 		}
 
 		if len(dbIp) == 0 {
-			return cli.Exit("Missing mandatory option (--db-ip) for adhoc query", -1)
+			return cli.Exit("Missing mandatory option (--db-ip) for adhoc query", errorExitCode)
 		}
 
 		if len(dbPort) == 0 {
-			return cli.Exit("Missing mandatory option (--db-port) for adhoc query", -1)
+			return cli.Exit("Missing mandatory option (--db-port) for adhoc query", errorExitCode)
 		}
+	}
+
+	// Stream and logical server information are exclusive, it is not possible to specify both, either specify
+	// logical server details (i.e. logical server, and cluster name). Or specify stream name only
+	if (len(lserver) > 0 || len(cluster) > 0) && len(stream) > 0 {
+		return cli.Exit(fmt.Sprintf("Stream and Logical Server flags cannot be specified at the same time in CLI global options" +
+		". Either specify a stream, or specify logical server information (i.e. logical server name, and cluster " +
+			"name"), errorExitCode)
 	}
 
 	// Validate date formats
@@ -212,21 +167,21 @@ func initializeAndValidateGFlags(context *cli.Context) error {
 	if len(startTime) > 0 {
 		_, err := time.Parse(timeFlagFormat, startTime)
 		if err != nil {
-			return cli.Exit(fmt.Sprintf("Invalid start-time format %s", startTime), -1)
+			return cli.Exit(fmt.Sprintf("Invalid start-time format %s", startTime), errorExitCode)
 		}
 	}
 
 	if len(endTime) > 0 {
 		_, err := time.Parse(timeFlagFormat, endTime)
 		if err != nil {
-			return cli.Exit(fmt.Sprintf("Invalid end-time format %s", endTime), -1)
+			return cli.Exit(fmt.Sprintf("Invalid end-time format %s", endTime), errorExitCode)
 		}
 	}
 
 	// Validate output file format
 	outputFormat := context.String("format")
 	if len(outputFormat) > 0 && strings.ToLower(outputFormat) != "csv" && strings.ToLower(outputFormat) != "table" {
-		return cli.Exit(fmt.Sprintf("Invalid output format %s", outputFormat), -1)
+		return cli.Exit(fmt.Sprintf("Invalid output format %s", outputFormat), errorExitCode)
 	}
 
 	// Parse EMM configuration file
@@ -235,15 +190,41 @@ func initializeAndValidateGFlags(context *cli.Context) error {
 	return nil
 }
 
-func validateCdrs(context *cli.Context) error {
+func validateThroughputOptions(context *cli.Context) error {
+
+	// Logical server name, and cluster are required to generate throughput for specific logical server
+	lserver := context.String("lserver")
+	cluster := context.String("cluster")
+
+	// Stream name is required to generate throughput for specific stream
+	stream := context.String("stream")
+
+	// Stream and logical server information are exclusive, it is not possible to specify both, either specify
+	// logical server details (i.e. logical server, and cluster name). Or specify stream name only
+	if (len(lserver) > 0 || len(cluster) > 0) && len(stream) > 0 {
+		return cli.Exit("Stream and Logical Server flags cannot be specified at the same time in CLI global options" +
+		". Either specify a stream, or specify logical server information (i.e. logical server name, and cluster " +
+			"name", errorExitCode)
+	} else if len(lserver) > 0 && len(cluster) == 0 {
+		return cli.Exit("Cluster name is missing", errorExitCode)
+	} else if len(lserver) == 0 && len(cluster) > 0 {
+		return cli.Exit("Logical server name is missing", errorExitCode)
+	} else if len(stream) == 0 {
+		return cli.Exit("Missing options, either specify a stream, or logical server and cluster", errorExitCode)
+	}
+
 	return nil
 }
 
-func validateFiles(context *cli.Context) error {
+func validateCdrsOptions(context *cli.Context) error {
 	return nil
 }
 
-func validatePerformance(context *cli.Context) error {
+func validateFilesOptions(context *cli.Context) error {
+	return nil
+}
+
+func validatePerformanceOptions(context *cli.Context) error {
 	return nil
 }
 
