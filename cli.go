@@ -80,68 +80,80 @@ var memCommand = &cli.Command{
 
 //######################### Global Flags ##################################
 var clusterGFlag = &cli.StringFlag{
-	Name:  "cluster, cl",
+	Name:  "cluster",
+	Aliases: []string{"cl"},
 	Usage: "Name of EMM cluster which contains the logical server",
 }
 
 var logicalServerGFlag = &cli.StringFlag{
-	Name:  "lserver, ls",
+	Name:  "lserver",
+	Aliases: []string{"ls"},
 	Usage: "Name of EMM logical server",
 }
 
 var outputFormatGFlag = &cli.StringFlag{
-	Name:  "format, fmt",
+	Name:  "format",
+	Aliases: []string{"fmt"},
 	Usage: "Output format of the report, valid values (table, csv)",
 	Value: "table",
 }
 
 var startTimeGFlag = &cli.StringFlag{
-	Name:  "start-time, sd",
+	Name:  "start-time",
+	Aliases: []string{"sd"},
 	Usage: "Start time of the report in the format YYMMDDHH24MISS",
 	Value: "20190101000000",
 }
 
 var endTimeGFlag = &cli.StringFlag{
-	Name:  "end-time, ed",
+	Name:  "end-time",
+	Aliases: []string{"ed"},
 	Usage: "End time of the report in the format YYMMDDHH24MISS",
 	Value: currentTime(),
 }
 
 var groupByGFlag = &cli.StringFlag{
-	Name:  "group-by, gb",
+	Name:  "group-by",
+	Aliases: []string{"gb"},
 	Usage: "Time interval for grouping of the result, possible values are minute, hour, day, month",
 	Value: "day",
 }
 
 var streamGFlag = &cli.StringFlag{
-	Name:  "stream, s",
+	Name:  "stream",
+	Aliases: []string{"s"},
 	Usage: "Name of the stream defined in YAML configuration file",
 }
 
 var verboseGFlag = &cli.BoolFlag{
-	Name:  "verbose, v",
+	Name:  "verbose",
+	Aliases: []string{"d"},
 	Usage: "Verbose mode (set log level to debug)",
 	Value: false,
 }
 
 //######################### Adhoc Database Global Flags ##################################
 var lsDatabaseGFlag = &cli.StringFlag{
-	Name:  "ls-dbname, ldb",
+	Name:  "ls-dbname",
+	Aliases: []string{"ldb"},
 	Usage: "Name of adhoc logical server database to specify in CLI without configuring it in EMM config file",
 }
 
 var perfDatabaseGFlag = &cli.StringFlag{
-	Name:  "pf-dbname, pdb",
+	Name:  "pf-dbname",
+	Aliases: []string{"pdb"},
 	Usage: "Name of adhoc performance database to specify in CLI without configuring it in EMM config file",
 }
 
 var dbIPGFlag = &cli.StringFlag{
-	Name:  "db-ip, ip",
+	Name:  "db-ip",
+	Aliases: []string{"ip"},
 	Usage: "IP of the adhoc database",
 }
 
 var dbPortGFlag = &cli.StringFlag{
-	Name:  "db-port, p",
+	Name:  "db-port",
+	Aliases: []string{"p"},
 	Usage: "Port of the adhoc database",
 }
 
