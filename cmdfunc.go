@@ -217,14 +217,68 @@ func validateThroughputOptions(context *cli.Context) error {
 }
 
 func validateCdrsOptions(context *cli.Context) error {
+	// Logical server name, and cluster are required to generate throughput for specific logical server
+	lserver := context.String("lserver")
+	cluster := context.String("cluster")
+
+	// Stream name is required to generate throughput for specific stream
+	stream := context.String("stream")
+
+	// Stream and logical server information are exclusive, it is not possible to specify both, either specify
+	// logical server details (i.e. logical server, and cluster name). Or specify stream name only
+	if (len(lserver) > 0 || len(cluster) > 0) && len(stream) > 0 {
+		return cli.Exit("Stream and Logical Server flags cannot be specified at the same time in CLI global options" +
+			". Either specify a stream, or specify logical server information (i.e. logical server name, and cluster " +
+			"name", errorExitCode)
+	} else if len(lserver) > 0 && len(cluster) == 0 {
+		return cli.Exit("Cluster name is missing", errorExitCode)
+	} else if len(lserver) == 0 && len(cluster) > 0 {
+		return cli.Exit("Logical server name is missing", errorExitCode)
+	} else if len(stream) == 0 {
+		return cli.Exit("Missing options, either specify a stream, or logical server and cluster", errorExitCode)
+	}
+
 	return nil
 }
 
 func validateFilesOptions(context *cli.Context) error {
+	// Logical server name, and cluster are required to generate throughput for specific logical server
+	lserver := context.String("lserver")
+	cluster := context.String("cluster")
+
+	// Stream name is required to generate throughput for specific stream
+	stream := context.String("stream")
+
+	// Stream and logical server information are exclusive, it is not possible to specify both, either specify
+	// logical server details (i.e. logical server, and cluster name). Or specify stream name only
+	if (len(lserver) > 0 || len(cluster) > 0) && len(stream) > 0 {
+		return cli.Exit("Stream and Logical Server flags cannot be specified at the same time in CLI global options" +
+			". Either specify a stream, or specify logical server information (i.e. logical server name, and cluster " +
+			"name", errorExitCode)
+	} else if len(lserver) > 0 && len(cluster) == 0 {
+		return cli.Exit("Cluster name is missing", errorExitCode)
+	} else if len(lserver) == 0 && len(cluster) > 0 {
+		return cli.Exit("Logical server name is missing", errorExitCode)
+	} else if len(stream) == 0 {
+		return cli.Exit("Missing options, either specify a stream, or logical server and cluster", errorExitCode)
+	}
+
 	return nil
 }
 
 func validatePerformanceOptions(context *cli.Context) error {
+	// Logical server name, and cluster are required to generate throughput for specific logical server
+	lserver := context.String("lserver")
+	cluster := context.String("cluster")
+
+	if len(lserver) > 0 && len(cluster) == 0 {
+		return cli.Exit("Cluster name is missing", errorExitCode)
+	} else if len(lserver) == 0 && len(cluster) > 0 {
+		return cli.Exit("Logical server name is missing", errorExitCode)
+	} else if len(lserver) == 0 && len(cluster) == 0 {
+		return cli.Exit("Missing cluster name and logical server options", errorExitCode)
+	}
+
 	return nil
 }
 

@@ -20,8 +20,9 @@ const (
 var cdrsCommand = &cli.Command{
 	Name:        "cdrs",
 	Aliases:     []string{"c"},
-	Description: "Input/Output CDRs statistics, cluster name is required",
+	Usage: "Input/Output CDRs statistics, cluster name is required",
 	Action:      cdrs,
+	Before: validateCdrsOptions,
 }
 
 // Command to generate the Files statistics, it could generate the below:
@@ -32,6 +33,7 @@ var filesCommand = &cli.Command{
 	Name:    "files",
 	Aliases: []string{"f"},
 	Usage:   "Input/Output Files statistics, cluster name is required",
+	Before: validateFilesOptions,
 }
 
 // Command to generate the Throughput (Files and CDRs) statistics, it could
@@ -57,6 +59,7 @@ var performanceCommand = &cli.Command{
 		cpuCommand,
 		memCommand,
 	},
+	Before: validatePerformanceOptions,
 }
 
 //######################### Performance Subcommands ##################################
