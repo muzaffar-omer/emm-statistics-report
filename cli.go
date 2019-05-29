@@ -160,6 +160,7 @@ var dbPortGFlag = &cli.StringFlag{
 func CreateCliApp() *cli.App {
 	return &cli.App{
 		Name:  "emmstats",
+		HelpName: "emmstats",
 		Usage: "Tool to generate EMM throughput and performance statistic reports",
 		Authors: []*cli.Author{
 			{Name: "Muzaffar", Email: "muzaffar.omer@gmail.com"},
