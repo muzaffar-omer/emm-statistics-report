@@ -2,13 +2,17 @@ package main
 
 import (
 	"fmt"
+	"github.com/briandowns/spinner"
 	"github.com/sirupsen/logrus"
 	"gopkg.in/urfave/cli.v2"
+	"time"
 )
 
 // throughput reports the total processed input/output for a logical server, or for specific stream running in a logical
 // server
 func throughput(context *cli.Context) error {
+
+	s := spinner.New(spinner.CharSets[35], 1000*time.Millisecond)  // Build our new spinner
 
 	startTimeArg := context.String("start-time")
 	endTimeArg := context.String("end-time")
@@ -50,6 +54,9 @@ func throughput(context *cli.Context) error {
 		stream := findStream(streamArg)
 
 		if stream.LogicalServer != nil {
+
+			s.Prefix = fmt.Sprintf("%s Stream Throughput ", stream.Name)
+			s.Start()
 
 			logicalServer := findLogicalServer(stream.LogicalServer.Name, stream.LogicalServer.Cluster)
 
@@ -93,6 +100,7 @@ func throughput(context *cli.Context) error {
 			rows := executeQuery(logicalServer, query)
 
 			if rows != nil {
+				s.Stop()
 				printResultTable(rows, fmt.Sprintf("Stream Throughput : %s", stream.Name))
 			}
 
@@ -102,8 +110,12 @@ func throughput(context *cli.Context) error {
 			}).Fatalf("%s stream is not assigned to any logical server", stream.Name)
 		}
 	} else if len(logicalServerArg) > 0 && len(clusterArg) > 0 {
+
 		// Generate throughput report for a complete logical server audittraillogentry
 		logicalServer := findLogicalServer(logicalServerArg, clusterArg)
+
+		s.Prefix = fmt.Sprintf("%s Logical Server Throughput ", logicalServer.Name)
+		s.Start()
 
 		groupByDateFormat := context.String("group-by")
 
@@ -141,6 +153,7 @@ func throughput(context *cli.Context) error {
 		rows := executeQuery(logicalServer, query)
 
 		if rows != nil {
+			s.Stop()
 			printResultTable(rows, fmt.Sprintf("Logical Server Throughput : %s", logicalServer.Name))
 		}
 
