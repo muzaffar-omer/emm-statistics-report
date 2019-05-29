@@ -7,6 +7,8 @@ import (
 	"time"
 )
 
+const timeFlagFormat = "20060102150405"
+
 //######################### Global Commands ##################################
 // Command to generate the CDRs statistics, it could generate the below:
 // - Input CDRs for a single server, or all servers
@@ -16,6 +18,8 @@ var cdrsCommand = &cli.Command{
 	Name:        "cdrs",
 	Aliases:     []string{"c"},
 	Description: "Input/Output CDRs statistics, cluster name is required",
+	Action: cdrs,
+	Before: validateCdrs,
 }
 
 // Command to generate the Files statistics, it could generate the below:
@@ -26,6 +30,7 @@ var filesCommand = &cli.Command{
 	Name:    "files",
 	Aliases: []string{"f"},
 	Usage:   "Input/Output Files statistics, cluster name is required",
+	Before: validateFiles,
 }
 
 // Command to generate the Throughput (Files and CDRs) statistics, it could
@@ -38,6 +43,7 @@ var throughputCommand = &cli.Command{
 	Aliases: []string{"t"},
 	Usage:   "Input/Output Files and CDRs statistics, cluster name is required",
 	Action:  throughput,
+	Before: validateThroughput,
 }
 
 // Command to generate CPU and Memory statistics as below:
@@ -50,6 +56,7 @@ var performanceCommand = &cli.Command{
 		cpuCommand,
 		memCommand,
 	},
+	Before: validatePerformance,
 }
 
 //######################### Performance Subcommands ##################################
@@ -116,12 +123,12 @@ var verboseGFlag = &cli.BoolFlag{
 
 //######################### Adhoc Database Global Flags ##################################
 var lsDatabaseGFlag = &cli.StringFlag{
-	Name:  "ls-database, ldb",
+	Name:  "ls-dbname, ldb",
 	Usage: "Name of adhoc logical server database to specify in CLI without configuring it in EMM config file",
 }
 
 var perfDatabaseGFlag = &cli.StringFlag{
-	Name:  "pf-database, pdb",
+	Name:  "pf-dbname, pdb",
 	Usage: "Name of adhoc performance database to specify in CLI without configuring it in EMM config file",
 }
 
@@ -164,6 +171,7 @@ func CreateCliApp() *cli.App {
 			throughputCommand,
 			performanceCommand,
 		},
+		Before: initializeAndValidateGFlags,
 	}
 
 }
@@ -171,22 +179,4 @@ func CreateCliApp() *cli.App {
 // Returns current time formatted in the format YYYYMMDDHH24MISS
 func currentTime() string {
 	return time.Now().Format("20060102150405")
-}
-
-type CliError struct{}
-
-func (e CliError) Error() string {
-	return ""
-}
-
-func validateCliArgs(context *cli.Context) error {
-
-	if len(context.String("ls-database")) > 0 ||
-		len(context.String("pf-database")) > 0 ||
-		len(context.String("db-ip")) > 0 ||
-		len(context.String("db-port")) > 0 {
-
-	}
-
-	return nil
 }
