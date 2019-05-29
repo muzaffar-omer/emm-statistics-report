@@ -108,6 +108,12 @@ var streamGFlag = &cli.StringFlag{
 	Usage: "Name of the stream defined in YAML configuration file",
 }
 
+var verboseGFlag = &cli.BoolFlag{
+	Name: "verbose, v",
+	Usage: "Verbose mode (set log level to debug)",
+	Value: false,
+}
+
 //######################### Adhoc Database Global Flags ##################################
 var lsDatabaseGFlag = &cli.StringFlag{
 	Name:  "ls-database, ldb",
@@ -141,6 +147,7 @@ func CreateCliApp() *cli.App {
 			clusterGFlag,
 			logicalServerGFlag,
 			streamGFlag,
+			verboseGFlag,
 			outputFormatGFlag,
 			startTimeGFlag,
 			endTimeGFlag,

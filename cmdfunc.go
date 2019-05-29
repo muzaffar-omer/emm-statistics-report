@@ -1,6 +1,7 @@
 package main
 
 import (
+	"fmt"
 	"github.com/sirupsen/logrus"
 	"gopkg.in/urfave/cli.v2"
 )
@@ -15,6 +16,12 @@ func throughput(context *cli.Context) error {
 	// Logical server name, and cluster are required to generate throughput for specific logical server
 	logicalServerArg := context.String("lserver")
 	clusterArg := context.String("cluster")
+
+	verbose := context.Bool("verbose")
+
+	if verbose {
+		logger.SetLevel(logrus.DebugLevel)
+	}
 
 	// Stream name is required to generate throughput for specific stream
 	streamArg := context.String("stream")
@@ -44,6 +51,51 @@ func throughput(context *cli.Context) error {
 
 		if stream.LogicalServer != nil {
 
+			logicalServer := findLogicalServer(stream.LogicalServer.Name, stream.LogicalServer.Cluster)
+
+			groupByDateFormat := context.String("group-by")
+
+			switch groupByDateFormat {
+			case "month":
+				groupByDateFormat = month
+				break
+			case "day":
+				groupByDateFormat = day
+				break
+			case "hour":
+				groupByDateFormat = hour
+				break
+			case "minute":
+				groupByDateFormat = minute
+				break
+			default:
+				groupByDateFormat = day
+			}
+
+			params := AudittrailLogEntryQueryParameters{
+				TimeFormat:   groupByDateFormat,
+				StartTime:    startTimeArg,
+				EndTime:      endTimeArg,
+				InnodeNames:  stream.CollectorNames,
+				InnodeIds:    stream.CollectorIds,
+				OutnodeNames: stream.DistributorNames,
+				OutnodeIds:   stream.DistributorIds,
+			}
+
+			query := parseTemplate("throughput", streamThroughputQueryTemplate, params)
+
+			logger.WithFields(logrus.Fields{
+				"command" : "throughput",
+				"stream" : stream.Name,
+				"query" : query,
+			}).Debug("Stream throughput query")
+
+			rows := executeQuery(logicalServer, query)
+
+			if rows != nil {
+				printResultTable(rows, fmt.Sprintf("Stream Throughput : %s", stream.Name))
+			}
+
 		} else {
 			logger.WithFields(logrus.Fields{
 				"command": "throughput",
@@ -56,11 +108,20 @@ func throughput(context *cli.Context) error {
 		groupByDateFormat := context.String("group-by")
 
 		switch groupByDateFormat {
-			case "month" : groupByDateFormat = month; break
-			case "day" : groupByDateFormat = day; break
-			case "hour" : groupByDateFormat = hour; break
-			case "minute" : groupByDateFormat = minute; break
-			default: groupByDateFormat = day
+		case "month":
+			groupByDateFormat = month
+			break
+		case "day":
+			groupByDateFormat = day
+			break
+		case "hour":
+			groupByDateFormat = hour
+			break
+		case "minute":
+			groupByDateFormat = minute
+			break
+		default:
+			groupByDateFormat = day
 		}
 
 		params := AudittrailLogEntryQueryParameters{
@@ -71,10 +132,16 @@ func throughput(context *cli.Context) error {
 
 		query := parseTemplate("throughput", lsThroughputQueryTemplate, params)
 
+		logger.WithFields(logrus.Fields{
+			"command" : "throughput",
+			"logical_server" : logicalServer.Name,
+			"query" : query,
+		}).Debug("Logical server throughput query")
+
 		rows := executeQuery(logicalServer, query)
 
 		if rows != nil {
-			printResultTable(rows)
+			printResultTable(rows, fmt.Sprintf("Logical Server Throughput : %s", logicalServer.Name))
 		}
 
 	} else {

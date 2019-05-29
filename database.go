@@ -109,7 +109,7 @@ func executeQuery(ls *LogicalServer, query string) *sqlx.Rows {
 	return rows
 }
 
-func printResultTable(rows *sqlx.Rows) {
+func printResultTable(rows *sqlx.Rows, caption string) {
 
 	var table = tablewriter.NewWriter(os.Stdout)
 	var statsMap = make(map[string][]float64)
@@ -119,6 +119,7 @@ func printResultTable(rows *sqlx.Rows) {
 
 	columns, _ := rows.Columns()
 
+	table.SetCaption(true, caption)
 	table.SetHeader(columns)
 
 	for rows.Next() {

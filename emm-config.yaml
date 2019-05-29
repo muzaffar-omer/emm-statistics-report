@@ -3,27 +3,29 @@ clusters:
     username: mmsuper # Default username used to access logical servers databases
     password: mediation
     logical-servers:
-      - name: Server5
-        ip: 10.135.5.81
-        username: mmsuper
-        passwod: thule
-        port: 5432
+    - name: Server5
+      ip: 10.135.5.81
+      username: mmsuper
+      passwod: thule
+      port: 5432
+
   - name: ryd2
     username: mmsuper
     password: mediation
     logical-servers:
-      - name: Server1
-        ip: 10.135.3.125
+    - name: Server1
+      ip: 10.135.3.125
+
   - name: dev
     username: mmsuper
     password: mediation
     logical-servers:
-      - name: Server11
-        ip: localhost
-        port: 5432
-        username: mmsuper
-        password: mediation
-        database: fm_db_Server11
+    - name: Server11
+      ip: localhost
+      port: 5432
+      username: mmsuper
+      password: mediation
+      database: fm_db_Server11
 
 configurations:
   - name: UAT_Test
@@ -32,14 +34,16 @@ configurations:
     assigned-logical-server:
       name: Server1
       cluster: ryd2
+
   - name: 4GLTE_INPUT_CDRs
-    coll-names: ["to4G_LTE_in_RD", "to4G_LTE_in_RD", "to4G_LTE_in_RD", "to4G_LTE_in_RD"]
+    dist-names: ["to4G_LTE_in_RD", "to4G_LTE_in_RD", "to4G_LTE_in_RD", "to4G_LTE_in_RD"]
     assigned-logical-server:
       name: Server11
       cluster: dev
+
   - name: HWPGW_INPUT_CDRs
-      coll-names: ["toHW_PGW_in_RD", "toHW_PGW_in_JD", "toHW_PGW_in_JE", "toHW_PGW_in_JE"]
-      coll-ids: ["14025"]
-      assigned-logical-server:
-        name: Server11
-        cluster: dev
+    dist-names: ["toHW_PGW_in_RD", "toHW_PGW_in_JD", "toHW_PGW_in_JE", "toHW_PGW_in_JE"]
+    dist-ids: ["14025"]
+    assigned-logical-server:
+      name: Server11
+      cluster: dev

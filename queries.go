@@ -8,10 +8,10 @@ import (
 
 const (
 	defaultDBTimeFormat = "YYYYMMDDHH24"
-	day = "YYYYMMDD"
-	hour = "YYYYMMDDHH24"
-	minute = "YYYYMMDDHH24MI"
-	month = "YYYYMM"
+	day                 = "YYYYMMDD"
+	hour                = "YYYYMMDDHH24"
+	minute              = "YYYYMMDDHH24MI"
+	month               = "YYYYMM"
 
 	// Template for generation of Input/Output throughput of a logical server
 	lsThroughputQueryTemplate = `SELECT CASE
@@ -76,6 +76,7 @@ const (
 		ON c.time = d.time) b
 		ON a.time = b.time`
 
+	// Template for generation of Input/Output throughput of a stream
 	streamThroughputQueryTemplate = `SELECT CASE
 		WHEN a.time IS NOT NULL THEN a.time
 		WHEN b.time IS NOT NULL THEN b.time
@@ -89,10 +90,20 @@ const (
 			COALESCE(b.total_output_bytes, 0) AS total_output_bytes
 		FROM   (SELECT To_char(intime, '{{.TimeFormat}}') AS time,
 			Count (*)                     AS total_input_files,
-			Sum(bytes)                    AS total_input_bytes
+			Sum(bytes)::bigint            AS total_input_bytes
 		FROM   audittraillogentry
 		WHERE  event = 67
-		AND Trim(innodename) IN ( %[2]s )
+			{{- $names := concat .InnodeNames -}}
+			{{- $ids := concat .InnodeIds -}}
+			{{- if and $names $ids -}}
+				AND (trim(innodename) IN ({{- $names -}}) OR innodeid IN ({{- $ids -}}))
+			{{- else if $names -}}
+				AND (trim(innodename) IN ({{- $names -}}))
+			{{- else if $ids -}}
+				AND (innodeid IN ({{- $ids -}}))
+			{{- else -}}
+				AND 1=2
+			{{- end -}}
 		GROUP  BY To_char(intime, '{{.TimeFormat}}')
 		ORDER  BY To_char(intime, '{{.TimeFormat}}')) a
 		FULL OUTER JOIN (SELECT CASE
@@ -105,12 +116,21 @@ const (
 			d.total_output_cdrs,
 			d.total_output_bytes
 		FROM   (SELECT To_char(intime, '{{.TimeFormat}}') AS time,
-			COALESCE(Sum (cdrs), 0)       AS
+			COALESCE(Sum (cdrs)::bigint, 0)       AS
 		total_input_cdrs
 		FROM   audittraillogentry
 		WHERE  event = 73
-		AND (Trim(innodename) IN (
-			%[2]s ) OR innodeid IN (%%%%%%%%))
+			{{- $names := concat .InnodeNames -}}
+			{{- $ids := concat .InnodeIds -}}
+			{{- if and $names $ids -}}
+				AND (trim(innodename) IN ({{- $names -}}) OR innodeid IN ({{- $ids -}}))
+			{{- else if $names -}}
+				AND (trim(innodename) IN ({{- $names -}}))
+			{{- else if $ids -}}
+				AND (innodeid IN ({{- $ids -}}))
+			{{- else -}}
+				AND 1=2
+			{{- end -}}
 		GROUP  BY To_char(intime, '{{.TimeFormat}}')
 		ORDER  BY To_char(intime, '{{.TimeFormat}}')) c
 		FULL OUTER JOIN (SELECT
@@ -119,17 +139,25 @@ const (
 			Count(*)
 		AS
 		total_output_files,
-			Sum(cdrs)
+			Sum(cdrs)::bigint 
 		AS
 		total_output_cdrs,
-			Sum(bytes)
+			Sum(bytes)::bigint 
 		AS
 		total_output_bytes
 		FROM   audittraillogentry
 		WHERE  event = 68
-		AND Trim(outnodename) IN
-		(
-			%[3]s )
+			{{- $names := concat .OutnodeNames -}}
+			{{- $ids := concat .OutnodeIds -}}
+			{{- if and $names $ids -}}
+				AND (trim(outnodename) IN ({{- $names -}}) OR outnodeid IN ({{- $ids -}}))
+			{{- else if $names -}}
+				AND (trim(outnodename) IN ({{- $names -}}))
+			{{- else if $ids -}}
+				AND (outnodeid IN ({{- $ids -}}))
+			{{- else -}}
+				AND 1=2
+			{{- end -}}
 		GROUP  BY To_char(outtime,
 			'{{.TimeFormat}}'
 		)
@@ -152,12 +180,29 @@ type AudittrailLogEntryQueryParameters struct {
 	OutnodeIds   []string
 }
 
-type TrafficQueryParameters struct {
-}
-
 func parseTemplate(templateName string, queryTemplate string, paramStruct interface{}) string {
 	var actualQuery bytes.Buffer
-	var parsedTemplate = template.Must(template.New(templateName).Parse(queryTemplate))
+
+	funcMap := template.FuncMap{
+		"inc": func(i int) int {
+			return i + 1
+		},
+		"concat": func(args []string) string {
+			result := ""
+
+			for i, arg := range args {
+				result += fmt.Sprintf("'%s'", arg)
+
+				if i+1 != len(args) {
+					result += ","
+				}
+			}
+
+			return result
+		},
+	}
+
+	parsedTemplate := template.Must(template.New(templateName).Funcs(funcMap).Parse(queryTemplate))
 
 	err := parsedTemplate.Execute(&actualQuery, paramStruct)
 
