@@ -1,3 +1,6 @@
 emm-info.json
 .idea/*
 emmstats
+*.csv
+*.txt
+*.xls

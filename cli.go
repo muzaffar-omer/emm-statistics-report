@@ -3,38 +3,18 @@ package main
 import (
 	//"fmt"
 
+	"fmt"
 	"gopkg.in/urfave/cli.v2"
 	"time"
 )
 
 const (
 	timeFlagFormat = "20060102150405"
-	errorExitCode  = -1
+	errorExitCode  = 10
+	csvFileFormat = "csv"
+	xlsFileFormat = "xls"
+	txtFileFormat = "txt"
 )
-
-//######################### Global Commands ##################################
-// Command to generate the CDRs statistics, it could generate the below:
-// - Input CDRs for a single server, or all servers
-// - Output CDRs for a single server, or all servers
-// - Input/Output CDRs for a single server, or all servers
-var cdrsCommand = &cli.Command{
-	Name:        "cdrs",
-	Aliases:     []string{"c"},
-	Usage: "Input/Output CDRs statistics, cluster name is required",
-	Action:      cdrs,
-	Before: validateCdrsOptions,
-}
-
-// Command to generate the Files statistics, it could generate the below:
-// - Input Files for a single server, or all servers
-// - Output Files for a single server, or all servers
-// - Input/Output Files for a single server, or all servers
-var filesCommand = &cli.Command{
-	Name:    "files",
-	Aliases: []string{"f"},
-	Usage:   "Input/Output Files statistics, cluster name is required",
-	Before: validateFilesOptions,
-}
 
 // Command to generate the Throughput (Files and CDRs) statistics, it could
 // generate the below:
@@ -94,8 +74,8 @@ var logicalServerGFlag = &cli.StringFlag{
 var outputFormatGFlag = &cli.StringFlag{
 	Name:  "format",
 	Aliases: []string{"fmt"},
-	Usage: "Output format of the report, valid values (table, csv)",
-	Value: "table",
+	Usage: fmt.Sprintf("Output format of the report, valid values (%s, %s, %s)", txtFileFormat, csvFileFormat, xlsFileFormat),
+	Value: txtFileFormat,
 }
 
 var startTimeGFlag = &cli.StringFlag{
@@ -130,6 +110,26 @@ var verboseGFlag = &cli.BoolFlag{
 	Aliases: []string{"d"},
 	Usage: "Verbose mode (set log level to debug)",
 	Value: false,
+}
+
+var outputFileGFlag = &cli.StringFlag{
+	Name:  "output-file",
+	Aliases: []string{"of"},
+	Usage: "Full path name of the file to store the output of the query",
+}
+
+var configFileGFlag = &cli.StringFlag{
+	Name:  "config-file",
+	Aliases: []string{"cfg"},
+	Usage: "Full path name of EMM YAML configuration file",
+	Value: "emm-config.yaml",
+}
+
+var outputDirGFlag = &cli.StringFlag{
+	Name:  "output-dir",
+	Aliases: []string{"od"},
+	Usage: "Full path name of the directory to store output files",
+	Value: ".",
 }
 
 //######################### Adhoc Database Global Flags ##################################
@@ -179,11 +179,11 @@ func CreateCliApp() *cli.App {
 			dbIPGFlag,
 			dbPortGFlag,
 			groupByGFlag,
+			outputFileGFlag,
+			outputDirGFlag,
 		},
 
 		Commands: []*cli.Command{
-			cdrsCommand,
-			filesCommand,
 			throughputCommand,
 			performanceCommand,
 		},

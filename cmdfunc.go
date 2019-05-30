@@ -27,6 +27,10 @@ func throughput(context *cli.Context) error {
 	// Stream name is required to generate throughput for specific stream
 	streamArg := context.String("stream")
 
+	outputFileArg := context.String("output-file")
+
+	outputFormatArg := context.String("format")
+
 	// Generate throughput report for a stream
 	if len(streamArg) > 0 {
 
@@ -61,7 +65,11 @@ func throughput(context *cli.Context) error {
 
 			if rows != nil {
 				s.Stop()
-				printResultTable(rows, fmt.Sprintf("Stream Throughput : %s", stream.Name))
+				data := printResultTable(rows, fmt.Sprintf("Stream Throughput : %s", stream.Name))
+
+				if len(outputFileArg)>0 {
+					writeToFile(data, outputFileArg, outputFormatArg)
+				}
 			}
 
 		} else {
@@ -95,7 +103,11 @@ func throughput(context *cli.Context) error {
 
 		if rows != nil {
 			s.Stop()
-			printResultTable(rows, fmt.Sprintf("Logical Server Throughput : %s", logicalServer.Name))
+			data := printResultTable(rows, fmt.Sprintf("Logical Server Throughput : %s", logicalServer.Name))
+
+			if len(outputFileArg)>0 {
+				writeToFile(data, outputFileArg, outputFormatArg)
+			}
 		}
 
 	} else {
@@ -180,7 +192,9 @@ func initializeAndValidateGFlags(context *cli.Context) error {
 
 	// Validate output file format
 	outputFormat := context.String("format")
-	if len(outputFormat) > 0 && strings.ToLower(outputFormat) != "csv" && strings.ToLower(outputFormat) != "table" {
+	if len(outputFormat) > 0 && strings.ToLower(outputFormat) != csvFileFormat &&
+		strings.ToLower(outputFormat) != xlsFileFormat &&
+		strings.ToLower(outputFormat) != txtFileFormat {
 		return cli.Exit(fmt.Sprintf("Invalid output format %s", outputFormat), errorExitCode)
 	}
 
@@ -209,8 +223,6 @@ func validateThroughputOptions(context *cli.Context) error {
 		return cli.Exit("Cluster name is missing", errorExitCode)
 	} else if len(lserver) == 0 && len(cluster) > 0 {
 		return cli.Exit("Logical server name is missing", errorExitCode)
-	} else if len(stream) == 0 {
-		return cli.Exit("Missing options, either specify a stream, or logical server and cluster", errorExitCode)
 	}
 
 	return nil

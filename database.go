@@ -109,18 +109,17 @@ func executeQuery(ls *LogicalServer, query string) *sqlx.Rows {
 	return rows
 }
 
-func printResultTable(rows *sqlx.Rows, caption string) {
+func printResultTable(rows *sqlx.Rows, caption string) [][]string{
 
 	var table = tablewriter.NewWriter(os.Stdout)
 	var statsMap = make(map[string][]float64)
 
 	var row map[string]interface{}
 	var rowFieldsStringVals []string
+	var data [][]string
 
 	columns, _ := rows.Columns()
-
-	table.SetCaption(true, caption)
-	table.SetHeader(columns)
+	data = append(data, columns)
 
 	for rows.Next() {
 		row = make(map[string]interface{})
@@ -137,8 +136,11 @@ func printResultTable(rows *sqlx.Rows, caption string) {
 		}
 
 		table.Append(rowFieldsStringVals)
+		data = append(data, rowFieldsStringVals)
 	}
 
+	table.SetCaption(true, caption)
+	table.SetHeader(columns)
 	table.Render()
 
 	// Average
@@ -160,6 +162,8 @@ func printResultTable(rows *sqlx.Rows, caption string) {
 	fmt.Printf("\n\nSum\n")
 	table = createSumTable(columns, statsMap)
 	table.Render()
+
+	return data
 }
 
 func createAverageTable(columns []string, statsMap map[string][]float64) *tablewriter.Table {
