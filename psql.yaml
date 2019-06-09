@@ -12,3 +12,6 @@ services:
     - type: bind
       source: /Users/muzaffar/Downloads/Temp
       target: /var/tmp/files
+    - type: bind
+      source: /Users/muzaffar/DockerVolumes/psql-docker-data
+      target: /var/lib/postgresql/data
