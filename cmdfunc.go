@@ -26,22 +26,20 @@ func throughput(context *cli.Context) error {
 
 	// Stream name is required to generate throughput for specific stream
 	streamArg := context.String("stream")
-
 	outputFileArg := context.String("output-file")
-
 	outputFormatArg := context.String("format")
 
 	// Generate throughput report for a stream
 	if len(streamArg) > 0 {
 
-		stream := findStream(streamArg)
+		stream := emmConfig.FindStream(streamArg)
 
 		if stream.LogicalServer != nil {
 
 			s.Prefix = fmt.Sprintf("%s Stream Throughput ", stream.Name)
 			s.Start()
 
-			logicalServer := findLogicalServer(stream.LogicalServer.Name, stream.LogicalServer.Cluster)
+			logicalServer := emmConfig.FindLogicalServer(stream.LogicalServer.Name, stream.LogicalServer.Cluster)
 
 			params := AudittrailLogEntryQueryParameters{
 				TimeFormat:   chooseGroupByFormat(context.String("group-by")),
@@ -80,7 +78,7 @@ func throughput(context *cli.Context) error {
 	} else if len(logicalServerArg) > 0 && len(clusterArg) > 0 {
 
 		// Generate throughput report for a complete logical server audittraillogentry
-		logicalServer := findLogicalServer(logicalServerArg, clusterArg)
+		logicalServer := emmConfig.FindLogicalServer(logicalServerArg, clusterArg)
 
 		s.Prefix = fmt.Sprintf("%s Logical Server Throughput ", logicalServer.Name)
 		s.Start()

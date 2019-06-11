@@ -6,6 +6,12 @@ import (
 	"os"
 )
 
+type Report struct {
+	Data [][]string
+	Name string
+	OutputFile string
+}
+
 func writeToFile(data [][]string, filename string, format string) {
 
 	switch format {

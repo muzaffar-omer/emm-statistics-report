@@ -61,11 +61,11 @@ type LogicalServer struct {
 }
 
 // Equals compares the current logical server with another logical server
-func (this LogicalServer) Equals(another *LogicalServer) bool {
-	if this.Username == another.Username &&
-		this.IP == another.IP &&
-		this.Password == another.Password &&
-		this.Port == another.Port {
+func (l LogicalServer) Equals(another *LogicalServer) bool {
+	if l.Username == another.Username &&
+		l.IP == another.IP &&
+		l.Password == another.Password &&
+		l.Port == another.Port {
 		return true
 	}
 
@@ -74,64 +74,53 @@ func (this LogicalServer) Equals(another *LogicalServer) bool {
 
 // findStream Looks in the streams defined in the configuration file, and returns the Stream object matching the
 // streamName
-func findStream(streamName string) *Stream {
+func (c Config) FindStream(streamName string) *Stream {
 
 	logger.WithFields(logrus.Fields{
 		"stream": streamName,
 	}).Debug("Searching for stream in EMM configuration")
 
-	if emmConfig != nil {
-		for _, stream := range emmConfig.Streams {
-			if stream.Name == streamName {
-				return stream
-			}
+	for _, stream := range c.Streams {
+		if stream.Name == streamName {
+			return stream
 		}
-	} else {
-		logger.Warn("emmConfig is nil")
 	}
 
 	return nil
 }
 
 // findLogicalServer searches for a logical server in EMM configuration using logical server name, and cluster name
-func findLogicalServer(name string, cluster string) *LogicalServer {
+func (c Config) FindLogicalServer(logicalServerName string, clusterName string) *LogicalServer {
 
 	logger.WithFields(logrus.Fields{
-		"logical-server-name": name,
-		"cluster-name":        cluster,
+		"logical-server-name": logicalServerName,
+		"cluster-name":        clusterName,
 	}).Debug("Searching for logical server in EMM configuration")
 
-	if emmConfig != nil {
+	cluster := c.FindCluster(clusterName)
 
-		cluster := findCluster(cluster)
-
+	if cluster != nil {
 		for _, logicalServer := range cluster.LogicalServers {
-			if logicalServer.Name == name {
+			if logicalServer.Name == logicalServerName {
 				return logicalServer
 			}
 		}
-	} else {
-		logger.Warn("emmConfig is nil")
 	}
 
 	return nil
 }
 
 // findCluster searches for a cluster definition in EMM configuration file using cluster name
-func findCluster(name string) *Cluster {
+func (c Config) FindCluster(clusterName string) *Cluster {
 
 	logger.WithFields(logrus.Fields{
-		"cluster-name": name,
+		"cluster-name": clusterName,
 	}).Debug("Searching for cluster in EMM configuration")
 
-	if emmConfig != nil {
-		for _, cluster := range emmConfig.Clusters {
-			if cluster.Name == name {
-				return cluster
-			}
+	for _, cluster := range c.Clusters {
+		if cluster.Name == clusterName {
+			return cluster
 		}
-	} else {
-		logger.Warn("emmConfig is nil")
 	}
 
 	return nil
