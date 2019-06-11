@@ -6,7 +6,6 @@ import (
 	"github.com/olekukonko/tablewriter"
 	"github.com/sirupsen/logrus"
 	"os"
-	"reflect"
 	"strconv"
 
 	//"strconv"
@@ -85,31 +84,25 @@ func CreateSession(ls *LogicalServer) *Session {
 	return newSession
 }
 
-func executeQuery(ls *LogicalServer, query string) *sqlx.Rows {
+func (s Session) executeQuery(query string) *Report {
+	var report Report
 
-	var rows *sqlx.Rows
+	rows, err := s.Db.Queryx(query)
 
-	if session := CreateSession(ls); session != nil {
-
-		rows, err := session.Db.Queryx(query)
-
-		if err != nil {
-			logger.WithFields(logrus.Fields{
-				"query": fmt.Sprintf(query),
-				"error": err,
-			}).Error("Querying all rows")
-		}
-
-		return rows
-
-	} else {
-		fmt.Println("Session is nil")
+	if err != nil {
+		logger.WithFields(logrus.Fields{
+			"query": fmt.Sprintf(query),
+			"error": err,
+		}).Error("Querying all rows")
 	}
 
-	return rows
+	report = Report{}
+	report.ExtractResultSet(rows)
+
+	return &report
 }
 
-func printResultTable(rows *sqlx.Rows, caption string) [][]string{
+func printResultTable(rows *sqlx.Rows, caption string) [][]string {
 
 	var table = tablewriter.NewWriter(os.Stdout)
 	var statsMap = make(map[string][]float64)
@@ -185,7 +178,7 @@ func createAverageTable(columns []string, statsMap map[string][]float64) *tablew
 	return table
 }
 
-func createMaxTable(columns []string,  statsMap map[string][]float64) *tablewriter.Table {
+func createMaxTable(columns []string, statsMap map[string][]float64) *tablewriter.Table {
 	var table = tablewriter.NewWriter(os.Stdout)
 	var statsFields = []string{}
 
@@ -204,7 +197,7 @@ func createMaxTable(columns []string,  statsMap map[string][]float64) *tablewrit
 	return table
 }
 
-func createMinTable(columns []string,  statsMap map[string][]float64) *tablewriter.Table {
+func createMinTable(columns []string, statsMap map[string][]float64) *tablewriter.Table {
 	var table = tablewriter.NewWriter(os.Stdout)
 	var statsFields = []string{}
 
@@ -223,7 +216,7 @@ func createMinTable(columns []string,  statsMap map[string][]float64) *tablewrit
 	return table
 }
 
-func createSumTable(columns []string,  statsMap map[string][]float64) *tablewriter.Table {
+func createSumTable(columns []string, statsMap map[string][]float64) *tablewriter.Table {
 	var table = tablewriter.NewWriter(os.Stdout)
 	var statsFields = []string{}
 
@@ -242,36 +235,3 @@ func createSumTable(columns []string,  statsMap map[string][]float64) *tablewrit
 	return table
 }
 
-func rowFieldToString(field interface{}) string {
-	var v = reflect.ValueOf(field)
-	var t = reflect.TypeOf(field)
-	var fieldStringValue string
-
-	switch t.Kind() {
-	case reflect.Int64:
-		fieldStringValue = strconv.FormatInt(v.Int(), 10)
-	case reflect.Uint8:
-		fieldStringValue = strconv.FormatInt(v.Int(), 10)
-	case reflect.String:
-		fieldStringValue = v.String()
-	}
-
-	return fieldStringValue
-}
-
-func rowFieldToFloat(field interface{}) (float64, error) {
-	var v = reflect.ValueOf(field)
-	var t = reflect.TypeOf(field)
-	var fieldFloatValue float64
-
-	switch t.Kind() {
-	case reflect.Int64:
-		fieldFloatValue = float64(v.Int())
-	case reflect.Uint8:
-		fieldFloatValue = float64(v.Int())
-	default:
-		return 0, fmt.Errorf("Not numeric field")
-	}
-
-	return fieldFloatValue, nil
-}

@@ -26,8 +26,8 @@ func throughput(context *cli.Context) error {
 
 	// Stream name is required to generate throughput for specific stream
 	streamArg := context.String("stream")
-	outputFileArg := context.String("output-file")
-	outputFormatArg := context.String("format")
+	//outputFileArg := context.String("output-file")
+	//outputFormatArg := context.String("format")
 
 	// Generate throughput report for a stream
 	if len(streamArg) > 0 {
@@ -59,15 +59,16 @@ func throughput(context *cli.Context) error {
 				"query":   query,
 			}).Debug("Stream throughput query")
 
-			rows := executeQuery(logicalServer, query)
+			session := CreateSession(logicalServer)
+			rows := session.executeQuery(query)
 
 			if rows != nil {
 				s.Stop()
-				data := printResultTable(rows, fmt.Sprintf("Stream Throughput : %s", stream.Name))
+				//data := printResultTable(rows, fmt.Sprintf("Stream Throughput : %s", stream.Name))
 
-				if len(outputFileArg)>0 {
-					writeToFile(data, outputFileArg, outputFormatArg)
-				}
+				//if len(outputFileArg)>0 {
+				//	writeToFile(data, outputFileArg, outputFormatArg)
+				//}
 			}
 
 		} else {
@@ -97,16 +98,23 @@ func throughput(context *cli.Context) error {
 			"query":          query,
 		}).Debug("Logical server throughput query")
 
-		rows := executeQuery(logicalServer, query)
+		session := CreateSession(logicalServer)
+		report := session.executeQuery(query)
 
-		if rows != nil {
-			s.Stop()
-			data := printResultTable(rows, fmt.Sprintf("Logical Server Throughput : %s", logicalServer.Name))
+		report.GetDefaultTable().WriteToConsole()
+		report.GetDefaultTable().WriteToCSVFile("Daily Report.csv")
+		report.GetAvgTable().WriteToConsole()
+		report.GetMinTable().WriteToConsole()
+		report.GetMaxTable().WriteToConsole()
 
-			if len(outputFileArg)>0 {
-				writeToFile(data, outputFileArg, outputFormatArg)
-			}
-		}
+		//if rows != nil {
+		//	s.Stop()
+			//data := printResultTable(rows, fmt.Sprintf("Logical Server Throughput : %s", logicalServer.Name))
+
+			//if len(outputFileArg)>0 {
+			//	writeToFile(data, outputFileArg, outputFormatArg)
+			//}
+		//}
 
 	} else {
 		logger.WithFields(logrus.Fields{
