@@ -15,7 +15,7 @@ const spinnerUpdateFreq = 1000 * time.Millisecond
 // server
 func throughput(context *cli.Context) error {
 
-	s := spinner.New(spinner.CharSets[35], spinnerUpdateFreq) // Build our new spinner
+	s := spinner.New(spinner.CharSets[36], spinnerUpdateFreq) // Build our new spinner
 
 	startTimeArg := context.String("start-time")
 	endTimeArg := context.String("end-time")
@@ -60,16 +60,14 @@ func throughput(context *cli.Context) error {
 			}).Debug("Stream throughput query")
 
 			session := CreateSession(logicalServer)
-			rows := session.executeQuery(query)
+			report := session.executeQuery(query)
 
-			if rows != nil {
-				s.Stop()
-				//data := printResultTable(rows, fmt.Sprintf("Stream Throughput : %s", stream.Name))
+			s.Stop()
 
-				//if len(outputFileArg)>0 {
-				//	writeToFile(data, outputFileArg, outputFormatArg)
-				//}
-			}
+				report.GetDefaultTable().WriteToConsole()
+				report.GetAvgTable().WriteToConsole()
+				report.GetMinTable().WriteToConsole()
+				report.GetMaxTable().WriteToConsole()
 
 		} else {
 			logger.WithFields(logrus.Fields{
@@ -99,22 +97,15 @@ func throughput(context *cli.Context) error {
 		}).Debug("Logical server throughput query")
 
 		session := CreateSession(logicalServer)
+
 		report := session.executeQuery(query)
 
-		report.GetDefaultTable().WriteToConsole()
-		report.GetDefaultTable().WriteToCSVFile("Daily Report.csv")
-		report.GetAvgTable().WriteToConsole()
-		report.GetMinTable().WriteToConsole()
-		report.GetMaxTable().WriteToConsole()
+		s.Stop()
 
-		//if rows != nil {
-		//	s.Stop()
-			//data := printResultTable(rows, fmt.Sprintf("Logical Server Throughput : %s", logicalServer.Name))
-
-			//if len(outputFileArg)>0 {
-			//	writeToFile(data, outputFileArg, outputFormatArg)
-			//}
-		//}
+			report.GetDefaultTable().WriteToConsole()
+			report.GetAvgTable().WriteToConsole()
+			report.GetMinTable().WriteToConsole()
+			report.GetMaxTable().WriteToConsole()
 
 	} else {
 		logger.WithFields(logrus.Fields{
