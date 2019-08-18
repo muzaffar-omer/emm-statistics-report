@@ -11,9 +11,9 @@ import (
 const (
 	timeFlagFormat = "20060102150405"
 	errorExitCode  = 10
-	csvFileFormat = "csv"
-	xlsFileFormat = "xls"
-	txtFileFormat = "txt"
+	csvFileFormat  = "csv"
+	xlsFileFormat  = "xls"
+	txtFileFormat  = "txt"
 )
 
 // Command to generate the Throughput (Files and CDRs) statistics, it could
@@ -26,7 +26,7 @@ var throughputCommand = &cli.Command{
 	Aliases: []string{"t"},
 	Usage:   "Input/Output Files and CDRs statistics, cluster name is required",
 	Action:  throughput,
-	Before: validateThroughputOptions,
+	Before:  validateThroughputOptions,
 }
 
 // Command to generate CPU and Memory statistics as below:
@@ -60,108 +60,108 @@ var memCommand = &cli.Command{
 
 //######################### Global Flags ##################################
 var clusterGFlag = &cli.StringFlag{
-	Name:  "cluster",
+	Name:    "cluster",
 	Aliases: []string{"cl"},
-	Usage: "Name of EMM cluster which contains the logical server",
+	Usage:   "Name of EMM cluster which contains the logical server",
 }
 
 var logicalServerGFlag = &cli.StringFlag{
-	Name:  "lserver",
+	Name:    "lserver",
 	Aliases: []string{"ls"},
-	Usage: "Name of EMM logical server",
+	Usage:   "Name of EMM logical server",
 }
 
 var outputFormatGFlag = &cli.StringFlag{
-	Name:  "format",
+	Name:    "format",
 	Aliases: []string{"fmt"},
-	Usage: fmt.Sprintf("Output format of the report, valid values (%s, %s, %s)", txtFileFormat, csvFileFormat, xlsFileFormat),
-	Value: txtFileFormat,
+	Usage:   fmt.Sprintf("Output format of the report, valid values (%s, %s, %s)", txtFileFormat, csvFileFormat, xlsFileFormat),
+	Value:   txtFileFormat,
 }
 
 var startTimeGFlag = &cli.StringFlag{
-	Name:  "start-time",
+	Name:    "start-time",
 	Aliases: []string{"sd"},
-	Usage: "Start time of the report in the format YYMMDDHH24MISS",
-	Value: "20190101000000",
+	Usage:   "Start time of the report in the format YYMMDDHH24MISS",
+	Value:   "20190101000000",
 }
 
 var endTimeGFlag = &cli.StringFlag{
-	Name:  "end-time",
+	Name:    "end-time",
 	Aliases: []string{"ed"},
-	Usage: "End time of the report in the format YYMMDDHH24MISS",
-	Value: currentTime(),
+	Usage:   "End time of the report in the format YYMMDDHH24MISS",
+	Value:   currentTime(),
 }
 
 var groupByGFlag = &cli.StringFlag{
-	Name:  "group-by",
+	Name:    "group-by",
 	Aliases: []string{"gb"},
-	Usage: "Time interval for grouping of the result, possible values are minute, hour, day, month",
-	Value: "day",
+	Usage:   "Time interval for grouping of the result, possible values are minute, hour, day, month",
+	Value:   "day",
 }
 
 var streamGFlag = &cli.StringFlag{
-	Name:  "stream",
+	Name:    "stream",
 	Aliases: []string{"s"},
-	Usage: "Name of the stream defined in YAML configuration file",
+	Usage:   "Name of the stream defined in YAML configuration file",
 }
 
 var verboseGFlag = &cli.BoolFlag{
-	Name:  "verbose",
+	Name:    "verbose",
 	Aliases: []string{"d"},
-	Usage: "Verbose mode (set log level to debug)",
-	Value: false,
+	Usage:   "Verbose mode (set log level to debug)",
+	Value:   false,
 }
 
 var outputFileGFlag = &cli.StringFlag{
-	Name:  "output-file",
+	Name:    "output-file",
 	Aliases: []string{"of"},
-	Usage: "Full path name of the file to store the output of the query",
+	Usage:   "Full path name of the file to store the output of the query",
 }
 
 var configFileGFlag = &cli.StringFlag{
-	Name:  "config-file",
+	Name:    "config-file",
 	Aliases: []string{"cfg"},
-	Usage: "Full path name of EMM YAML configuration file",
-	Value: "emm-config.yaml",
+	Usage:   "Full path name of EMM YAML configuration file",
+	Value:   "emm-config.yaml",
 }
 
 var outputDirGFlag = &cli.StringFlag{
-	Name:  "output-dir",
+	Name:    "output-dir",
 	Aliases: []string{"od"},
-	Usage: "Full path name of the directory to store output files",
-	Value: ".",
+	Usage:   "Full path name of the directory to store output files",
+	Value:   ".",
 }
 
 //######################### Adhoc Database Global Flags ##################################
 var lsDatabaseGFlag = &cli.StringFlag{
-	Name:  "ls-dbname",
+	Name:    "ls-dbname",
 	Aliases: []string{"ldb"},
-	Usage: "Name of adhoc logical server database to specify in CLI without configuring it in EMM config file",
+	Usage:   "Name of adhoc logical server database to specify in CLI without configuring it in EMM config file",
 }
 
 var perfDatabaseGFlag = &cli.StringFlag{
-	Name:  "pf-dbname",
+	Name:    "pf-dbname",
 	Aliases: []string{"pdb"},
-	Usage: "Name of adhoc performance database to specify in CLI without configuring it in EMM config file",
+	Usage:   "Name of adhoc performance database to specify in CLI without configuring it in EMM config file",
 }
 
 var dbIPGFlag = &cli.StringFlag{
-	Name:  "db-ip",
+	Name:    "db-ip",
 	Aliases: []string{"ip"},
-	Usage: "IP of the adhoc database",
+	Usage:   "IP of the adhoc database",
 }
 
 var dbPortGFlag = &cli.StringFlag{
-	Name:  "db-port",
+	Name:    "db-port",
 	Aliases: []string{"p"},
-	Usage: "Port of the adhoc database",
+	Usage:   "Port of the adhoc database",
 }
 
 func CreateCliApp() *cli.App {
 	return &cli.App{
-		Name:  "emmstats",
+		Name:     "emmstats",
 		HelpName: "emmstats",
-		Usage: "Tool to generate EMM throughput and performance statistic reports",
+		Usage:    "tool to generate EMM throughput and performance statistic reports",
 		Authors: []*cli.Author{
 			{Name: "Muzaffar", Email: "muzaffar.omer@gmail.com"},
 		},
